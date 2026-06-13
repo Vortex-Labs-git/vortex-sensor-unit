@@ -1,4 +1,4 @@
-menu "Example Configuration"
+menu "WiFi Mode Configuration"
 
     menu "SoftAP Configuration"
         comment "SoftAP Configuration"
@@ -32,51 +32,84 @@ menu "Example Configuration"
     menu "STA Configuration"
         comment "STA Configuration"
 
-        config ESP_WIFI_REMOTE_AP_SSID
-            string "WiFi Remote AP SSID"
-            default "otherapssid"
+        config ESP_WIFI_STA_MODE_RESET
+            bool "Reset WiFi Storage to Default"
+            default n
+            help
+                Reset WiFi storage to default values.
+
+        config ESP_WIFI_STA_SSID
+            string "WiFi SSID"
+            default "sta_ssid"
             help
                 SSID (network name) for the example's sta to connect to.
 
-        config ESP_WIFI_REMOTE_AP_PASSWORD
-            string "WiFi Remote AP Password"
-            default "otherappassword"
+        config ESP_WIFI_STA_PASSWD
+            string "WiFi Password"
+            default "sta_password"
             help
                 WiFi password for the example to use.
 
-        config ESP_MAXIMUM_STA_RETRY
+        config ESP_WIFI_STA_MAXIMUM_RETRY
             int "Maximum retry"
             default 5
             help
                 Set the maximum retry value to prevent the station from continuously
                 attempting to reconnect to the Access Point (AP) when the AP doesn't exist.
 
-        choice ESP_WIFI_SCAN_AUTH_MODE_THRESHOLD
-            prompt "WiFi Scan auth mode threshold"
-            default ESP_WIFI_AUTH_WPA2_PSK
-            help
-                The weakest authmode to accept in the scan mode.
-                This value defaults to ESP_WIFI_AUTH_WPA2_PSK in case password is present
-                and ESP_WIFI_AUTH_OPEN is used. Please select ESP_WIFI_AUTH_WEP / ESP_WIFI_AUTH_WPA_PSK
-                in case AP is operating in WEP / WPA mode.
+    endmenu
+endmenu
 
-            config ESP_WIFI_AUTH_OPEN
-                bool "OPEN"
-            config ESP_WIFI_AUTH_WEP
-                bool "WEP"
-            config ESP_WIFI_AUTH_WPA_PSK
-                bool "WPA PSK"
-            config ESP_WIFI_AUTH_WPA2_PSK
-                bool "WPA2 PSK"
-            config ESP_WIFI_AUTH_WPA_WPA2_PSK
-                bool "WPA/WPA2 PSK"
-            config ESP_WIFI_AUTH_WPA3_PSK
-                bool "WPA3 PSK"
-            config ESP_WIFI_AUTH_WPA2_WPA3_PSK
-                bool "WPA2/WPA3 PSK"
-            config ESP_WIFI_AUTH_WAPI_PSK
-                bool "WAPI PSK"
-        endchoice
+menu "Device Configuration"
+    menu "Device Data Configuration"
+        comment "Device Data Configuration"
+
+        config SENSOR_UNIT_ID
+            string "Sensor unit ID"
+            default "SU202605001"
+            help
+                Senssor unit Id.
+
+        config WS_PASSKEY_VALUE
+            string "WebSocket Passkey"
+            default "12345"
+            help
+                WebSocket passkey for the device.
 
     endmenu
+
+
+    menu "LED Indicators Configuration"
+        comment "LED Indicators Configuration"
+
+        config RED_LED_PIN
+            int "RED LED PIN"
+            default 17
+            help
+                Red LED pin number.
+
+        config GREEN_LED_PIN
+            int "GREEN LED PIN"
+            default 16
+            help
+                Green LED pin number.
+    endmenu
+
+    menu "MQTT client Configuration"
+        comment "MQTT client Configuration"
+
+        config MQTT_BROKER_URI
+            string "MQTT BROKER URI"
+            default "mqtt://10.217.90.172"
+            help
+                MQTT broker URI for the device to connect to.
+
+        config MQTT_BASE_TOPIC
+            string "MQTT BASE TOPIC"
+            default "vortex_device/sensor_unit/"
+            help
+                MQTT base topic for the device communication.
+
+    endmenu
+    
 endmenu
