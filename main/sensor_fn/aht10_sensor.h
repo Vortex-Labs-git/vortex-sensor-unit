@@ -1,22 +1,24 @@
 #ifndef AHT10_SENSOR_H
 #define AHT10_SENSOR_H
 
-#include <stdint.h>
 
 #include "driver/gpio.h"
 #include "driver/i2c.h"
-#include "esp_err.h"
 
-#include "global_fn/global_var.h"
+typedef struct {
+    const int I2C_port;
+    const uint8_t SDA_pin;
+    const uint8_t SCL_pin;
 
-#define AHT10_I2C_ADDRESS          0x38
-#define AHT10_I2C_MASTER_FREQ_HZ   100000
-#define AHT10_I2C_TIMEOUT_MS       1000
+    const uint8_t I2C_add;
 
-extern AHT10Sensor aht10Sensor;
+    const int Interval;
+} AHT10;
 
-esp_err_t aht10_init(i2c_port_t i2c_port, gpio_num_t sda_pin, gpio_num_t scl_pin);
+
+esp_err_t aht10_sensor_init(AHT10 *aht10);
 esp_err_t aht10_read(float *temperature, float *humidity);
 esp_err_t aht10_read_sensor(AHT10Sensor *sensor);
+
 
 #endif // AHT10_SENSOR_H

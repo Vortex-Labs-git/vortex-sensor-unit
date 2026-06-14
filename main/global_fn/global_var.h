@@ -60,12 +60,12 @@ typedef struct {
 } SensorMap;
 
 
+
+
 // Declare the global variables
 extern GetWifi wifiStaData;
 extern GetSensors UnitSensorConfig;
-
 extern AHT10Sensor aht10Sensor;
-
 extern SensorMap sensorMap;
 
 #endif // GLOBAL_VAR_H

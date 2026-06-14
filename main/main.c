@@ -12,27 +12,11 @@
 #include "nvs_flash.h"
 
 
-
 #include "eeprom_fn/wifi_storage.h"
 #include "eeprom_fn/sensor_config.h"
 #include "wifi_fn/vortex_wifi.h"
 #include "sensor_fn/external_sensor.h"
-#include "sensor_fn/sensor_process.h" \
-
-
-
-
-
-/* ========================== GLOBAL VARIABLES ========================== */
-
-/**
- * @brief Mutex to protect valve-related operations
- */
-SemaphoreHandle_t valveMutex = NULL;
-/**
- * @brief Mutex to protect web server operations
- */
-SemaphoreHandle_t serverMutex = NULL;
+#include "sensor_fn/sensor_process.h"
 
 
 
@@ -68,23 +52,15 @@ void app_main(void)
     wifi_storage_load();
     sensor_config_load();
 
-    // serverMutex = xSemaphoreCreateMutex();
-    // if (serverMutex == NULL) {
-    //     ESP_LOGE(TAG_MAIN, "Failed to create serverMutex");
-    //     return;
-    // }
-
-    // load_eeprom_calibration();
-
     // time_module_init();
 
     init_sensor_unit();
 
     // wifi_init_smart_mode();
 
-
     xTaskCreate( external_sensor_task, "external_sensor_task", 4096, NULL, 5, NULL);
-    // wifi_init_smart_mode();
+
+    xTaskCreate( aht10_sensor_task, "aht10_sensor_task", 4096, NULL, 5, NULL);
 
 
 }

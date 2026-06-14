@@ -24,9 +24,6 @@ void led_blink(LedIndicator *led, uint32_t period_ms);
 void led_blink2(LedIndicator *led, uint32_t on_ms, uint32_t off_ms);
 
 
-extern LedIndicator redLED;
-extern LedIndicator greenLED;
-
 
 
 #endif // LED_INDICATORS_H

@@ -60,6 +60,7 @@ menu "WiFi Mode Configuration"
     endmenu
 endmenu
 
+
 menu "Device Configuration"
     menu "Device Data Configuration"
         comment "Device Data Configuration"
@@ -79,15 +80,42 @@ menu "Device Configuration"
     endmenu
 
 
-    menu "AHT10 sensor Configurration"
-        config SENSOR_SCL_PIN
-            int "Sensor SCL Pin"
+    menu "AHT10 Sensor Configuration"
+        comment "AHT10 Sensor Configuration"
+
+        config AHT10_I2C_PORT
+            int "AHT10 I2C port"
+            default 0
+            range 0 1
+            help
+                ESP32 I2C port used by the AHT10 sensor.
+
+        config AHT10_SDA_PIN
+            int "AHT10 SDA pin"
             default 21
-        
-        config SENSOR_SDA_PIN
-            int "Sensor SDA Pin"
+            help
+                GPIO pin connected to AHT10 SDA.
+
+        config AHT10_SCL_PIN
+            int "AHT10 SCL pin"
             default 22
+            help
+                GPIO pin connected to AHT10 SCL.
+
+        config AHT10_I2C_ADD
+            int "AHT10 I2C address"
+            default 54
+            help
+                I2C address of the sensor  (54 - 0x36)
+
+        config AHT10_READ_INTERVAL_MS
+            int "AHT10 read interval in milliseconds"
+            default 2000
+            range 500 60000
+            help
+                How often the firmware reads and logs AHT10 temperature and humidity.
     endmenu
+
 
     menu "External Sensor Pin Configuration"
         menu "External port 1"
@@ -233,35 +261,6 @@ menu "Device Configuration"
                 Green LED pin number.
     endmenu
 
-    menu "AHT10 Sensor Configuration"
-        comment "AHT10 Sensor Configuration"
-
-        config AHT10_I2C_PORT
-            int "AHT10 I2C port"
-            default 0
-            range 0 1
-            help
-                ESP32 I2C port used by the AHT10 sensor.
-
-        config AHT10_SDA_PIN
-            int "AHT10 SDA pin"
-            default 21
-            help
-                GPIO pin connected to AHT10 SDA.
-
-        config AHT10_SCL_PIN
-            int "AHT10 SCL pin"
-            default 22
-            help
-                GPIO pin connected to AHT10 SCL.
-
-        config AHT10_READ_INTERVAL_MS
-            int "AHT10 read interval in milliseconds"
-            default 2000
-            range 500 60000
-            help
-                How often the firmware reads and logs AHT10 temperature and humidity.
-    endmenu
 
     menu "MQTT client Configuration"
         comment "MQTT client Configuration"

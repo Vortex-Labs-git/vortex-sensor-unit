@@ -16,10 +16,8 @@ typedef struct {
     ExternalSensor externalSensor[6];
 } ExternalSensorlist;
 
-extern ExternalSensorlist externalSensorList;
-
 
 void external_sensors_init(ExternalSensorlist *sensorList);
-void external_sensor_task(void *pvParameters);
+void external_sesnor_read(int sensor_index, ExternalSensor *hw);
 
 #endif // EXTERNAL_SENSOR_H

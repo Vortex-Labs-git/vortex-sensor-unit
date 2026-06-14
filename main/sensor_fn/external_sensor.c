@@ -65,31 +65,13 @@ void external_sensors_init(ExternalSensorlist *sensorList) {
 }
 
 
-
-void external_sensor_task(void *pvParameters) {
-    (void) pvParameters;
-
-    while (1) {
-
-        for (int i = 0; i < 6; i++) {
-
-            if (!sensorMap.sensorS[i].available) {
-                continue;
-            }
-
-            ExternalSensor *hw = &externalSensorList.externalSensor[i];
-
-            if (hw->channel == ADC1_CHANNEL_MAX) {
-                snprintf(sensorMap.sensorS[i].error_msg, sizeof(sensorMap.sensorS[i].error_msg), "Invalid ADC channel");
-                continue;
-            }
-
-            int raw = adc1_get_raw(hw->channel);
-            sensorMap.sensorS[i].data.raw = raw;
-
-            ESP_LOGI(TAG_EXTERNAL, "External sensor read. id: %s, value: %d", sensorMap.sensorS[i].sensor_id, raw);
-        }
-
-        vTaskDelay(pdMS_TO_TICKS(50));
+void external_sesnor_read(int sensor_index, ExternalSensor *hw) {
+    if (hw->channel == ADC1_CHANNEL_MAX) {
+        ESP_LOGE(TAG_EXTERNAL, "Invalid ADC channel");
+        return;
     }
+
+    int raw = adc1_get_raw(hw->channel);
+    sensorMap.sensorS[sensor_index].data.raw = raw;
+
 }
