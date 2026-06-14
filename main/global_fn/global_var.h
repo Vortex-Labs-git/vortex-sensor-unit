@@ -1,12 +1,6 @@
 #ifndef GLOBAL_VAR_H
 #define GLOBAL_VAR_H
 
-#include <stdbool.h>
-#include "freertos/FreeRTOS.h"
-#include "freertos/semphr.h"
-
-
-
 
 
 // Define the structure for get_wifi
@@ -27,7 +21,7 @@ typedef enum {
 } sensor_type_t;
 
 typedef struct {
-    char port_id[5];
+    char sensor_id[5];
     sensor_type_t type;
 } sensor_map_t;
 
@@ -45,9 +39,33 @@ typedef struct {
 } AHT10Sensor;
 
 
+// Define External sensor data structure
+typedef struct {
+    int raw;
+    float value;
+} SensorData;
+typedef struct {
+    bool available;
+    char sensor_id[5];
+    sensor_type_t type;
+
+    char sensor_name[20];
+    SensorData data;
+
+    char error_msg[100];
+} SensorS;
+
+typedef struct {
+    SensorS sensorS[6];
+} SensorMap;
+
+
 // Declare the global variables
 extern GetWifi wifiStaData;
 extern GetSensors UnitSensorConfig;
 
+extern AHT10Sensor aht10Sensor;
+
+extern SensorMap sensorMap;
 
 #endif // GLOBAL_VAR_H

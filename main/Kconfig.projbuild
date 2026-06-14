@@ -79,12 +79,81 @@ menu "Device Configuration"
     endmenu
 
 
-    menu AHT10 sensor Configurration
+    menu "AHT10 sensor Configurration"
+        config SENSOR_SCL_PIN
+            int "Sensor SCL Pin"
+            default 21
+        
+        config SENSOR_SDA_PIN
+            int "Sensor SDA Pin"
+            default 22
+    endmenu
 
+    menu "External Sensor Pin Configuration"
+        menu "External port 1"
+            config SENSOR_02_Pin_A0
+                int "Sensor 02 analog pin"
+                default 35
+            
+            config SENSOR_02_Pin_D0
+                int "Sensor 02 digital pin"
+                default 23
+        endmenu
+
+        menu "External port 2"
+            config SENSOR_03_Pin_A0
+                int "Sensor 03 analog pin"
+                default 35
+            
+            config SENSOR_03_Pin_D0
+                int "Sensor 03 digital pin"
+                default 23
+        endmenu
+
+        menu "External port 3"
+            config SENSOR_04_Pin_A0
+                int "Sensor 04 analog pin"
+                default 35
+            
+            config SENSOR_04_Pin_D0
+                int "Sensor 04 digital pin"
+                default 23
+        endmenu
+
+        menu "External port 4"
+            config SENSOR_05_Pin_A0
+                int "Sensor 05 analog pin"
+                default 35
+            
+            config SENSOR_05_Pin_D0
+                int "Sensor 05 digital pin"
+                default 23
+        endmenu
+
+        menu "External port 5"
+            config SENSOR_06_Pin_A0
+                int "Sensor 06 analog pin"
+                default 35
+            
+            config SENSOR_06_Pin_D0
+                int "Sensor 06 digital pin"
+                default 23
+        endmenu
+
+        menu "External port 6"
+            config SENSOR_07_Pin_A0
+                int "Sensor 07 analog pin"
+                default 35
+            
+            config SENSOR_07_Pin_D0
+                int "Sensor 07 digital pin"
+                default 23
+        endmenu
+  
     endmenu
 
 
-    menu "Default Port Sensor Configuration"
+    menu "External Sensor Map Configuration"
         config SENSOR_CONFIG_RESET
             bool "Reset Sensor config to Default"
             default n

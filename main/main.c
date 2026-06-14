@@ -15,6 +15,7 @@
 #include "eeprom_fn/wifi_storage.h"
 #include "eeprom_fn/sensor_config.h"
 #include "wifi_fn/vortex_wifi.h"
+#include "sensor_fn/external_sensor.h"
 #include "sensor_fn/sensor_process.h" 
 
 
@@ -77,9 +78,9 @@ void app_main(void)
     
     init_sensor_unit();
 
+    // wifi_init_smart_mode();
 
 
-    wifi_init_smart_mode();
-
+    xTaskCreate( external_sensor_task, "external_sensor_task", 4096, NULL, 5, NULL);
 
 }

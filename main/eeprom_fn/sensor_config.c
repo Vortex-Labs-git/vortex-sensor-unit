@@ -97,22 +97,22 @@ void sensor_config_restore_default(void)
 {
     memset(&UnitSensorConfig, 0, sizeof(GetSensors));
 
-    strcpy(UnitSensorConfig.sensors[0].port_id, "S02");
+    strcpy(UnitSensorConfig.sensors[0].sensor_id, "S02");
     UnitSensorConfig.sensors[0].type = (sensor_type_t)DEFAULT_S02_TYPE;
 
-    strcpy(UnitSensorConfig.sensors[1].port_id, "S03");
+    strcpy(UnitSensorConfig.sensors[1].sensor_id, "S03");
     UnitSensorConfig.sensors[1].type = (sensor_type_t)DEFAULT_S03_TYPE;
 
-    strcpy(UnitSensorConfig.sensors[2].port_id, "S04");
+    strcpy(UnitSensorConfig.sensors[2].sensor_id, "S04");
     UnitSensorConfig.sensors[2].type = (sensor_type_t)DEFAULT_S04_TYPE;
 
-    strcpy(UnitSensorConfig.sensors[3].port_id, "S05");
+    strcpy(UnitSensorConfig.sensors[3].sensor_id, "S05");
     UnitSensorConfig.sensors[3].type = (sensor_type_t)DEFAULT_S05_TYPE;
 
-    strcpy(UnitSensorConfig.sensors[4].port_id, "S06");
+    strcpy(UnitSensorConfig.sensors[4].sensor_id, "S06");
     UnitSensorConfig.sensors[4].type = (sensor_type_t)DEFAULT_S06_TYPE;
 
-    strcpy(UnitSensorConfig.sensors[5].port_id, "S07");
+    strcpy(UnitSensorConfig.sensors[5].sensor_id, "S07");
     UnitSensorConfig.sensors[5].type = (sensor_type_t)DEFAULT_S07_TYPE;
 
     sensor_config_save();
