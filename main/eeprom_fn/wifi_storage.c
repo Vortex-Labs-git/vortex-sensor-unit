@@ -92,11 +92,19 @@ esp_err_t wifi_storage_load(void)
                  wifiStaData.ssid,
                  wifiStaData.password,
                  wifiStaData.set_wifi);
-    } else {
-        ESP_LOGE(TAG_WIFI,
-                 "Failed to read WiFi data (%s)",
-                 esp_err_to_name(err));
+        return ESP_OK;
+    } 
+    
+    if (err == ESP_ERR_NVS_NOT_FOUND) {
+        ESP_LOGW(TAG_WIFI, "No WiFi config, loading defaults");
+
+        wifi_storage_restore_default();
+        return ESP_OK;
     }
+
+
+    ESP_LOGE(TAG_WIFI, "Failed to read WiFi data (%s)", esp_err_to_name(err));
+
 
     return err;
 }
@@ -152,15 +160,10 @@ esp_err_t wifi_storage_save(void)
     /**
      * Store the entire WiFi structure as a blob
      */
-    err = nvs_set_blob(handle,
-                       WIFI_NVS_KEY,
-                       &wifiStaData,
-                       sizeof(GetWifi));
+    err = nvs_set_blob(handle, WIFI_NVS_KEY, &wifiStaData, sizeof(GetWifi));
 
     if (err != ESP_OK) {
-        ESP_LOGE(TAG_WIFI,
-                 "Failed to write WiFi blob (%s)",
-                 esp_err_to_name(err));
+        ESP_LOGE(TAG_WIFI, "Failed to write WiFi blob (%s)", esp_err_to_name(err));
         nvs_close(handle);
         return err;
     }
@@ -171,9 +174,7 @@ esp_err_t wifi_storage_save(void)
     err = nvs_commit(handle);
 
     if (err != ESP_OK) {
-        ESP_LOGE(TAG_WIFI,
-                 "NVS commit failed (%s)",
-                 esp_err_to_name(err));
+        ESP_LOGE(TAG_WIFI, "NVS commit failed (%s)", esp_err_to_name(err));
     } else {
         ESP_LOGI(TAG_WIFI, "WiFi saved to NVS");
     }

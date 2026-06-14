@@ -79,6 +79,70 @@ menu "Device Configuration"
     endmenu
 
 
+    menu "Default Sensor Configuration"
+        config SENSOR_CONFIG_RESET
+            bool "Reset Sensor config to Default"
+            default n
+            help
+                Reset Sensor config to default values.
+        
+        config SENSOR_02_TYPE
+            int "Sensor S02 Type"
+            default 1
+            range 0 4
+            help 
+                sensor port 1 
+
+                0 = SENSOR_NONE
+                1 = SENSOR_TEMP
+                2 = SENSOR_MOISTURE
+                3 = SENSOR_HUMIDITY
+                4 = SENSOR_PH
+                
+        config SENSOR_03_TYPE
+            int "Sensor S03 Type"
+            default 2
+            range 0 4
+            help 
+                sensor port 2
+
+                0 = SENSOR_NONE
+                1 = SENSOR_TEMP
+                2 = SENSOR_MOISTURE
+                3 = SENSOR_HUMIDITY
+                4 = SENSOR_PH
+
+        config SENSOR_04_TYPE
+            int "Sensor S04 Type"
+            default 0
+            range 0 4
+            help 
+                sensor port 3
+
+        config SENSOR_05_TYPE
+            int "Sensor S05 Type"
+            default 0
+            range 0 4
+            help 
+                sensor port 4
+
+        config SENSOR_06_TYPE
+            int "Sensor S06 Type"
+            default 0
+            range 0 4
+            help 
+                sensor port 5
+
+        config SENSOR_07_TYPE
+            int "Sensor S07 Type"
+            default 0
+            range 0 4
+            help 
+                sensor port 6
+    
+    endmenu
+
+
     menu "LED Indicators Configuration"
         comment "LED Indicators Configuration"
 

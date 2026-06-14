@@ -13,6 +13,7 @@
 
 
 #include "eeprom_fn/wifi_storage.h"
+#include "eeprom_fn/sensor_config.h"
 #include "wifi_fn/vortex_wifi.h"
 #include "sensor_fn/sensor_process.h" 
 
@@ -38,18 +39,6 @@ SemaphoreHandle_t serverMutex = NULL;
 /* ================================ MAIN ================================== */
 /* ======================================================================== */
 
-/**
- * @brief Application entry point
- *
- * Responsibilities:
- *  - Initialize TCP/IP stack
- *  - Initialize NVS
- *  - Load WiFi credentials
- *  - Create mutexes
- *  - Initialize valve system
- *  - Start Smart WiFi
- *  - Obtain system time
- */
 void app_main(void)
 {
 
@@ -69,9 +58,14 @@ void app_main(void)
     wifi_storage_restore_default();
 #endif
 
-    wifi_storage_load();
+#if CONFIG_SENSOR_CONFIG_RESET
+    wifi_storage_restore_default();
+#endif
 
-    serverMutex = xSemaphoreCreateMutex();
+    wifi_storage_load();
+    sensor_config_load();
+
+    // serverMutex = xSemaphoreCreateMutex();
     // if (serverMutex == NULL) {
     //     ESP_LOGE(TAG_MAIN, "Failed to create serverMutex");
     //     return;

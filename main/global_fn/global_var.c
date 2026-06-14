@@ -20,3 +20,20 @@ GetWifi wifiStaData = {
     .password   = "",
     .set_wifi  = false
 };
+
+
+
+/* ======================================================================== */
+/* ========================= Sensor Config ================================ */
+/* ======================================================================== */
+
+GetSensors UnitSensorConfig = {
+    .sensors = {
+        {"S02", SENSOR_TEMP},
+        {"S03", SENSOR_MOISTURE},
+        {"S04", SENSOR_NONE},
+        {"S05", SENSOR_NONE},
+        {"S06", SENSOR_NONE},
+        {"S07", SENSOR_NONE},
+    }
+};
