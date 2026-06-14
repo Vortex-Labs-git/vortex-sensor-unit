@@ -4,8 +4,8 @@
   "idf.openOcdConfigs": [
     "board/esp32-wrover-kit-3.3v.cfg"
   ],
-  "idf.port": "/dev/ttyUSB0",
-  "idf.currentSetup": "/home/hp/.espressif/v5.4.3/esp-idf",
+  "idf.port": "/dev/tty.usbserial-0001",
+  "idf.currentSetup": "/Users/malithsankalpa/.espressif/v6.0/esp-idf",
   "idf.customExtraVars": {
     "IDF_TARGET": "esp32"
   },
@@ -15,5 +15,6 @@
     "--query-driver=**",
     "--compile-commands-dir=/home/hp/Documents/vortex_sensor_unit/build"
   ],
-  "idf.flashType": "UART"
+  "idf.flashType": "UART",
+  "C_Cpp.default.compilerPath": "/usr/bin/clang"
 }

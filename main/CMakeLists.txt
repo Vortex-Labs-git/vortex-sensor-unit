@@ -8,4 +8,5 @@ idf_component_register(SRCS
                         "sensor_fn/led_indicators.c"
                         "sensor_fn/external_sensor.c"
                         "sensor_fn/sensor_process.c"
+                        "sensor_fn/aht10_sensor.c"
                     INCLUDE_DIRS ".")
