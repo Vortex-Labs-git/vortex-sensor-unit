@@ -79,7 +79,12 @@ menu "Device Configuration"
     endmenu
 
 
-    menu "Default Sensor Configuration"
+    menu AHT10 sensor Configurration
+
+    endmenu
+
+
+    menu "Default Port Sensor Configuration"
         config SENSOR_CONFIG_RESET
             bool "Reset Sensor config to Default"
             default n
