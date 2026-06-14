@@ -1,2 +1,11 @@
-idf_component_register(SRCS "softap_sta.c"
+idf_component_register(SRCS 
+                        "main.c"
+                        "wifi_fn/vortex_wifi.c"
+                        "global_fn/global_var.c"
+                        "eeprom_fn/wifi_storage.c"
+                        "eeprom_fn/sensor_config.c"
+                        "time_fn/time_func.c"
+                        "sensor_fn/led_indicators.c"
+                        "sensor_fn/sensor_process.c"
+                        "sensor_fn/aht10_sensor.c"
                     INCLUDE_DIRS ".")
