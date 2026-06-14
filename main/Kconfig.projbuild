@@ -79,10 +79,6 @@ menu "Device Configuration"
     endmenu
 
 
-    menu AHT10 sensor Configurration
-
-    endmenu
-
 
     menu "Default Port Sensor Configuration"
         config SENSOR_CONFIG_RESET
@@ -162,6 +158,36 @@ menu "Device Configuration"
             default 16
             help
                 Green LED pin number.
+    endmenu
+
+    menu "AHT10 Sensor Configuration"
+        comment "AHT10 Sensor Configuration"
+
+        config AHT10_I2C_PORT
+            int "AHT10 I2C port"
+            default 0
+            range 0 1
+            help
+                ESP32 I2C port used by the AHT10 sensor.
+
+        config AHT10_SDA_PIN
+            int "AHT10 SDA pin"
+            default 21
+            help
+                GPIO pin connected to AHT10 SDA.
+
+        config AHT10_SCL_PIN
+            int "AHT10 SCL pin"
+            default 22
+            help
+                GPIO pin connected to AHT10 SCL.
+
+        config AHT10_READ_INTERVAL_MS
+            int "AHT10 read interval in milliseconds"
+            default 2000
+            range 500 60000
+            help
+                How often the firmware reads and logs AHT10 temperature and humidity.
     endmenu
 
     menu "MQTT client Configuration"

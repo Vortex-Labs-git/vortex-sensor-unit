@@ -12,10 +12,12 @@
 #include "nvs_flash.h"
 
 
+
 #include "eeprom_fn/wifi_storage.h"
 #include "eeprom_fn/sensor_config.h"
 #include "wifi_fn/vortex_wifi.h"
-#include "sensor_fn/sensor_process.h" 
+#include "sensor_fn/sensor_process.h"
+
 
 
 
@@ -74,12 +76,12 @@ void app_main(void)
     // load_eeprom_calibration();
 
     // time_module_init();
-    
+
     init_sensor_unit();
 
 
 
-    wifi_init_smart_mode();
+    // wifi_init_smart_mode();
 
 
 }
