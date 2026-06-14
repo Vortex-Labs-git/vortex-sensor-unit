@@ -9,6 +9,7 @@
  *  - Provides helper function to get ISO 8601 timestamps
  */
 
+ #include <stddef.h>
 #include <stdio.h>
 #include <time.h>
 #include "esp_sntp.h"

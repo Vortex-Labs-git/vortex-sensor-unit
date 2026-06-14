@@ -1,8 +1,6 @@
 #ifndef LED_INDICATORS_H
 #define LED_INDICATORS_H
 
-#include <stdint.h>
-#include <stdbool.h>
 
 
 typedef enum {
@@ -24,6 +22,11 @@ void led_on(LedIndicator *led);
 void led_off(LedIndicator *led);
 void led_blink(LedIndicator *led, uint32_t period_ms);
 void led_blink2(LedIndicator *led, uint32_t on_ms, uint32_t off_ms);
+
+
+extern LedIndicator redLED;
+extern LedIndicator greenLED;
+
 
 
 #endif // LED_INDICATORS_H

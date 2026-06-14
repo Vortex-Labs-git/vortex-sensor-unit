@@ -22,6 +22,7 @@
 
 #include "global_fn/global_var.h"
 #include "eeprom_fn/wifi_storage.h"
+#include "sensor_fn/led_indicators.h"
 #include "sensor_fn/sensor_process.h"
 
 
