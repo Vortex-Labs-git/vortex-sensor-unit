@@ -5,8 +5,20 @@ idf_component_register(SRCS
                         "eeprom_fn/wifi_storage.c"
                         "eeprom_fn/sensor_config.c"
                         "time_fn/time_func.c"
+                        "websocket_fn/websocket_server_fn.c"
+                        "websocket_fn/websocket_state_fn.c"
                         "sensor_fn/led_indicators.c"
                         "sensor_fn/external_sensor.c"
                         "sensor_fn/sensor_process.c"
                         "sensor_fn/aht10_sensor.c"
-                    INCLUDE_DIRS ".")
+                    INCLUDE_DIRS 
+                        "."
+                    REQUIRES
+                        esp_wifi
+                        mqtt 
+                        nvs_flash 
+                        json 
+                        esp_http_server 
+                        esp_event
+                        driver
+                    )
