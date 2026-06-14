@@ -18,7 +18,7 @@
 GetWifi wifiStaData = {
     .ssid       = "",
     .password   = "",
-    .set_wifi  = false
+    .set_wifi  = false,
 };
 
 
@@ -36,4 +36,11 @@ GetSensors UnitSensorConfig = {
         {"S06", SENSOR_NONE},
         {"S07", SENSOR_NONE},
     }
+};
+
+
+AHT10Sensor aht10Sensor = {
+    .temperature = 0.0,
+    .humidity = 0.0,
+    .error_msg = "",
 };

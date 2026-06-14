@@ -37,6 +37,14 @@ typedef struct {
 
 
 
+// Define the AHT10 sensor data structure
+typedef struct {
+    float temperature;
+    float humidity;
+    char error_msg[100];
+} AHT10Sensor;
+
+
 // Declare the global variables
 extern GetWifi wifiStaData;
 extern GetSensors UnitSensorConfig;
