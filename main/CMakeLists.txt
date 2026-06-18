@@ -7,12 +7,16 @@ idf_component_register(SRCS
                         "time_fn/time_func.c"
                         "websocket_fn/websocket_server_fn.c"
                         "websocket_fn/websocket_state_fn.c"
+                        "mqtt_fn/mqtt_client_fn.c"
+                        "mqtt_fn/mqtt_state_fn.c"
                         "sensor_fn/led_indicators.c"
                         "sensor_fn/external_sensor.c"
                         "sensor_fn/sensor_process.c"
                         "sensor_fn/aht10_sensor.c"
                     INCLUDE_DIRS 
                         "."
+                    EMBED_TXTFILES
+                        "mqtt_fn/ca_cert.pem"
                     REQUIRES
                         esp_wifi
                         mqtt 
