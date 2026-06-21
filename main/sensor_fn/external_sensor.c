@@ -81,7 +81,10 @@ void external_sesnor_read(int sensor_index, ExternalSensor *hw) {
     }
 
     int raw = adc1_get_raw(hw->channel);
+
+    xSemaphoreTake(ExternalsensorMutex, portMAX_DELAY);
     sensorMap.sensorS[sensor_index].data.raw = raw;
+    xSemaphoreGive(ExternalsensorMutex);
 
 }
 

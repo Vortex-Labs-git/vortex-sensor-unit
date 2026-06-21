@@ -20,6 +20,14 @@
 
 
 
+static const char *TAG_MAIN = "MAIN LOOP";
+
+/**
+ * @brief Mutex to protect sensor-related operations
+ */
+SemaphoreHandle_t InbuildsensorMutex = NULL;
+SemaphoreHandle_t ExternalsensorMutex = NULL;
+
 
 
 /* ======================================================================== */
@@ -52,6 +60,20 @@ void app_main(void)
     wifi_storage_load();
     sensor_config_load();
 
+
+    InbuildsensorMutex = xSemaphoreCreateMutex();
+    if (InbuildsensorMutex == NULL) {
+        ESP_LOGE(TAG_MAIN, "Failed to create InbuildsensorMutex");
+        return;
+    }
+
+    ExternalsensorMutex = xSemaphoreCreateMutex();
+    if (ExternalsensorMutex == NULL) {
+        ESP_LOGE(TAG_MAIN, "Failed to create ExternalsensorMutex");
+        return;
+    }
+
+    
     init_sensor_unit();
     wifi_init_smart_mode();
 

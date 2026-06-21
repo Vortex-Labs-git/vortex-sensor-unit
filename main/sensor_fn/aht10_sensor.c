@@ -253,8 +253,10 @@ esp_err_t aht10_read_sensor(AHT10Sensor *sensor)
         return ret;
     }
 
+    xSemaphoreTake(InbuildsensorMutex, portMAX_DELAY);
     sensor->temperature = temperature;
     sensor->humidity = humidity;
+    xSemaphoreGive(InbuildsensorMutex);
 
     return ESP_OK;
 }

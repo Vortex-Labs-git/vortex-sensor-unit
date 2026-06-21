@@ -46,7 +46,6 @@
 /* ========================== GLOBAL VARIABLES ========================== */
 
 
-static const char *TAG_MAIN = "MAIN LOOP";
 static const char *TAG_AP = "WiFi SoftAP";
 static const char *TAG_STA = "WiFi Sta";
 

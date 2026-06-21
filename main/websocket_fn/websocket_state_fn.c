@@ -4,6 +4,9 @@
 #include "cJSON.h"
 #include "sdkconfig.h" 
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+
 #include "global_fn/global_var.h"
 #include "sensor_fn/external_sensor.h"
 #include "websocket_state_fn.h"
@@ -63,6 +66,11 @@ void send_device_info(void) {
 void send_sensorunit_data(void) {
     if (esp_server == NULL) return;
 
+    AHT10Sensor in_snap;
+    xSemaphoreTake(InbuildsensorMutex, portMAX_DELAY);
+    in_snap = aht10Sensor;
+    xSemaphoreGive(InbuildsensorMutex);
+
     char timestamp[20];
     get_current_timestamp(timestamp, sizeof(timestamp));
 
@@ -87,7 +95,7 @@ void send_sensorunit_data(void) {
         cJSON_AddStringToObject(sensor, "sensor_id", "S01");
         cJSON_AddStringToObject(sensor, "sensor_type", "Temperature");
         cJSON_AddStringToObject(sensor, "sensor_name", "Inbuild Temp");
-        cJSON_AddNumberToObject(sensor, "sensor_value", aht10Sensor.temperature);
+        cJSON_AddNumberToObject(sensor, "sensor_value", in_snap.temperature);
 
         cJSON_AddItemToArray(data, sensor);
         sensor_count++;
@@ -102,7 +110,7 @@ void send_sensorunit_data(void) {
         cJSON_AddStringToObject(sensor, "sensor_id", "S02");
         cJSON_AddStringToObject(sensor, "sensor_type", "Humidity");
         cJSON_AddStringToObject(sensor, "sensor_name", "inbuild humidity");
-        cJSON_AddNumberToObject(sensor, "sensor_value", aht10Sensor.humidity);
+        cJSON_AddNumberToObject(sensor, "sensor_value", in_snap.humidity);
 
         cJSON_AddItemToArray(data, sensor);
         sensor_count++;
@@ -112,22 +120,25 @@ void send_sensorunit_data(void) {
      * External sensors S02-S07
      * Only add available sensors
      * ---------------------------------------------------- */
+
+    SensorMap ex_snap;
+    xSemaphoreTake(ExternalsensorMutex, portMAX_DELAY);
+    ex_snap = sensorMap;
+    xSemaphoreGive(ExternalsensorMutex);
     for (int i = 0; i < 6; i++)
     {
-        if (!sensorMap.sensorS[i].available)
+        if (!ex_snap.sensorS[i].available)
             continue;
 
         cJSON *sensor = cJSON_CreateObject();
 
         char sensor_id[32];
-        snprintf(sensor_id, sizeof(sensor_id), "%s", sensorMap.sensorS[i].sensor_id);
+        snprintf(sensor_id, sizeof(sensor_id), "%s", ex_snap.sensorS[i].sensor_id);
         cJSON_AddStringToObject(sensor, "sensor_id", sensor_id);
 
-        cJSON_AddStringToObject(sensor, "sensor_type", sensor_type_to_string( sensorMap.sensorS[i].type));
-
-        cJSON_AddStringToObject(sensor, "sensor_name", sensorMap.sensorS[i].sensor_name);
-
-        cJSON_AddNumberToObject(sensor, "sensor_value", sensorMap.sensorS[i].data.value);
+        cJSON_AddStringToObject(sensor, "sensor_type", sensor_type_to_string( ex_snap.sensorS[i].type));
+        cJSON_AddStringToObject(sensor, "sensor_name", ex_snap.sensorS[i].sensor_name);
+        cJSON_AddNumberToObject(sensor, "sensor_value", ex_snap.sensorS[i].data.value);
 
         cJSON_AddItemToArray(data, sensor);
         sensor_count++;

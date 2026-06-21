@@ -1,6 +1,14 @@
 #ifndef GLOBAL_VAR_H
 #define GLOBAL_VAR_H
 
+#include "freertos/FreeRTOS.h"
+#include "freertos/semphr.h"
+
+
+
+extern SemaphoreHandle_t InbuildsensorMutex ;
+extern SemaphoreHandle_t ExternalsensorMutex ;
+
 
 
 // Define the structure for get_wifi
