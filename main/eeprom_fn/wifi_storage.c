@@ -88,11 +88,7 @@ esp_err_t wifi_storage_load(void)
     nvs_close(handle);
 
     if (err == ESP_OK) {
-        ESP_LOGI(TAG_WIFI,
-                 "WiFi loaded (ssid=%s,password=%s,set_wifi=%d)",
-                 wifiStaData.ssid,
-                 wifiStaData.password,
-                 wifiStaData.set_wifi);
+        ESP_LOGI(TAG_WIFI, "WiFi loaded (ssid=%s,password=%s,set_wifi=%d)", wifiStaData.ssid, wifiStaData.password, wifiStaData.set_wifi);
         return ESP_OK;
     } 
     
@@ -152,9 +148,7 @@ esp_err_t wifi_storage_save(void)
      */
     err = nvs_open(WIFI_NVS_NAMESPACE, NVS_READWRITE, &handle);
     if (err != ESP_OK) {
-        ESP_LOGE(TAG_WIFI,
-                 "Failed to open NVS (%s)",
-                 esp_err_to_name(err));
+        ESP_LOGE(TAG_WIFI, "Failed to open NVS (%s)", esp_err_to_name(err));
         return err;
     }
 
@@ -178,6 +172,7 @@ esp_err_t wifi_storage_save(void)
         ESP_LOGE(TAG_WIFI, "NVS commit failed (%s)", esp_err_to_name(err));
     } else {
         ESP_LOGI(TAG_WIFI, "WiFi saved to NVS");
+        ESP_LOGI(TAG_WIFI, "WiFi data (ssid=%s,password=%s,set_wifi=%d)", wifiStaData.ssid, wifiStaData.password, wifiStaData.set_wifi);
     }
 
     nvs_close(handle);

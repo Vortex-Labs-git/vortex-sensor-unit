@@ -54,7 +54,7 @@ void external_sensors_init(ExternalSensorlist *sensorList) {
         if (type == SENSOR_NONE) {
             ESP_LOGI(TAG_EXTERNAL, "Sensor not config on: %s",  sensor->sensor_id);
             sensorMap.sensorS[sensor_index].available = false;
-            return;
+            continue;
         }
 
         sensorMap.sensorS[sensor_index].available = true;
@@ -64,7 +64,8 @@ void external_sensors_init(ExternalSensorlist *sensorList) {
 
         if (ch == ADC1_CHANNEL_MAX) {
             ESP_LOGE(TAG_EXTERNAL, "Invalid GPIO for ADC: %d", sensor->pin_A0);
-            return;
+            sensorMap.sensorS[sensor_index].available = false;
+            continue;
         }
         sensor->channel = ch;
 

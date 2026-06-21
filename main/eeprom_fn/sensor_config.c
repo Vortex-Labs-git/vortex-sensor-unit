@@ -21,8 +21,7 @@ static const char *TAG_SENSOR = "sensor_storage";
 
 
 
-esp_err_t sensor_config_load(void)
-{
+esp_err_t sensor_config_load(void) {
     nvs_handle_t handle;
     esp_err_t err;
     size_t size = sizeof(GetSensors);
@@ -40,6 +39,9 @@ esp_err_t sensor_config_load(void)
 
     if (err == ESP_OK) {
         ESP_LOGI(TAG_SENSOR, "Sensor config loaded");
+        for (int i = 0; i < 6; i++) {
+            ESP_LOGI(TAG_SENSOR, "Sensor[%d]: id=%s, type=%d, name=%s", i, UnitSensorConfig.sensors[i].sensor_id, UnitSensorConfig.sensors[i].type, UnitSensorConfig.sensors[i].sensor_name);
+        }
         return ESP_OK;
     }
 
@@ -57,8 +59,7 @@ esp_err_t sensor_config_load(void)
 
 
 
-esp_err_t sensor_config_save(void)
-{
+esp_err_t sensor_config_save(void) {
     nvs_handle_t handle;
     esp_err_t err;
 
@@ -82,6 +83,9 @@ esp_err_t sensor_config_save(void)
 
     if (err == ESP_OK) {
         ESP_LOGI(TAG_SENSOR, "Sensor config saved");
+        for (int i = 0; i < 6; i++) {
+            ESP_LOGI(TAG_SENSOR, "Sensor[%d]: id=%s, type=%d, name=%s", i, UnitSensorConfig.sensors[i].sensor_id, UnitSensorConfig.sensors[i].type, UnitSensorConfig.sensors[i].sensor_name);
+        }
     } else {
         ESP_LOGE(TAG_SENSOR, "Commit failed (%s)", esp_err_to_name(err));
     }
@@ -93,8 +97,7 @@ esp_err_t sensor_config_save(void)
 
 
 
-void sensor_config_restore_default(void)
-{
+void sensor_config_restore_default(void) {
     memset(&UnitSensorConfig, 0, sizeof(GetSensors));
 
     strcpy(UnitSensorConfig.sensors[0].sensor_id, "S02");

@@ -94,7 +94,7 @@ void external_sensor_task(void *pvParameters) {
             ESP_LOGI(PROCESS_TAG, "External sensor read. id: %s, value: %d", sensorMap.sensorS[sensor_index].sensor_id, sensorMap.sensorS[sensor_index].data.raw);
         }
 
-        vTaskDelay(pdMS_TO_TICKS(50));
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
 }
 

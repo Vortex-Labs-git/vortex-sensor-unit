@@ -55,12 +55,15 @@ void send_device_info(void) {
     char *json_string = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
 
+    ESP_LOGI(WEB_STATE_TAG, "Sending: %s", json_string);
+
     // Send via WebSocket
     if (httpd_queue_work(esp_server, websocket_async_send, json_string) != ESP_OK) {
         ESP_LOGE(WEB_STATE_TAG, "Failed to queue work");
         free(json_string);
     }
 }
+
 
 
 void send_sensorunit_data(void) {
@@ -150,6 +153,8 @@ void send_sensorunit_data(void) {
     char *json_string = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
 
+    ESP_LOGI(WEB_STATE_TAG, "Sending: %s", json_string);
+
     // Send via WebSocket
     if (httpd_queue_work(esp_server, websocket_async_send, json_string) != ESP_OK) {
         ESP_LOGE(WEB_STATE_TAG, "Failed to queue work");
@@ -175,6 +180,22 @@ void get_sensorunit_config(void) {
     cJSON *sensor_array = cJSON_CreateArray();
     int sensor_count = 0;
 
+    // in-build temp sensor
+    cJSON *T_sensor = cJSON_CreateObject();
+    cJSON_AddStringToObject( T_sensor, "sensor_id", "S00");
+    cJSON_AddStringToObject( T_sensor, "sensor_type", sensor_type_to_string( SENSOR_TEMP));
+    cJSON_AddStringToObject( T_sensor, "sensor_name", "In-build Temparature");
+    cJSON_AddItemToArray(sensor_array, T_sensor);
+    sensor_count++;
+
+    // in-build humidity sensor
+    cJSON *H_sensor = cJSON_CreateObject();
+    cJSON_AddStringToObject( H_sensor, "sensor_id", "S01");
+    cJSON_AddStringToObject( H_sensor, "sensor_type", sensor_type_to_string( SENSOR_HUMIDITY));
+    cJSON_AddStringToObject( H_sensor, "sensor_name", "In-build Humidity");
+    cJSON_AddItemToArray(sensor_array, H_sensor);
+    sensor_count++;
+
     for (int i = 0; i < 6; i++)
     {
         if (UnitSensorConfig.sensors[i].type == SENSOR_NONE)
@@ -198,14 +219,14 @@ void get_sensorunit_config(void) {
     char *json_string = cJSON_PrintUnformatted(json);
     cJSON_Delete(json);
 
+    ESP_LOGI(WEB_STATE_TAG, "Sending: %s", json_string);
+
     // Send via WebSocket
     if (httpd_queue_work(esp_server, websocket_async_send, json_string) != ESP_OK) {
         ESP_LOGE(WEB_STATE_TAG, "Failed to queue work");
         free(json_string);
     }
 }
-
-
 
 
 esp_err_t set_sensorunit_config(cJSON *sensor_data, cJSON *no_sensors)
@@ -226,12 +247,23 @@ esp_err_t set_sensorunit_config(cJSON *sensor_data, cJSON *no_sensors)
         return ESP_ERR_INVALID_ARG;
     }
 
+    static const GetSensors DefaultSensorConfig = {
+        .sensors = {
+            {"S02", SENSOR_NONE, ""},
+            {"S03", SENSOR_NONE, ""},
+            {"S04", SENSOR_NONE, ""},
+            {"S05", SENSOR_NONE, ""},
+            {"S06", SENSOR_NONE, ""},
+            {"S07", SENSOR_NONE, ""},
+        }
+    };
+    memcpy(&UnitSensorConfig, &DefaultSensorConfig, sizeof(UnitSensorConfig));
+
     cJSON *sensor = NULL;
     int updated_count = 0;
     int j = 0;
 
-    cJSON_ArrayForEach(sensor, sensor_data)
-    {
+    cJSON_ArrayForEach(sensor, sensor_data) {
         if (j >= count) {
             break;
         }
@@ -247,17 +279,18 @@ esp_err_t set_sensorunit_config(cJSON *sensor_data, cJSON *no_sensors)
         for (int i = 0; i < 6; i++) {
             if (strcmp(UnitSensorConfig.sensors[i].sensor_id, sensor_id->valuestring) == 0) {
                 UnitSensorConfig.sensors[i].type = string_to_sensor_type(sensor_type->valuestring);
-
                 strncpy( UnitSensorConfig.sensors[i].sensor_name, sensor_name->valuestring, sizeof(UnitSensorConfig.sensors[i].sensor_name) - 1);
-
                 UnitSensorConfig.sensors[i].sensor_name[sizeof(UnitSensorConfig.sensors[i].sensor_name) - 1] = '\0';
-
                 updated_count++;
 
                 break;
             }
         }
         j++;
+    }
+
+    for (int i = 0; i < 6; i++) {
+        ESP_LOGI(WEB_STATE_TAG, "Sensor[%d]: id=%s, type=%d, name=%s", i, UnitSensorConfig.sensors[i].sensor_id, UnitSensorConfig.sensors[i].type, UnitSensorConfig.sensors[i].sensor_name);
     }
 
     if (updated_count == 0) {

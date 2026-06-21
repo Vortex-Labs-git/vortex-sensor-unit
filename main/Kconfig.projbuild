@@ -5,13 +5,13 @@ menu "WiFi Mode Configuration"
 
         config ESP_WIFI_AP_SSID
             string "WiFi AP SSID"
-            default "myssid"
+            default "SU200001001"
             help
                 SSID (network name) of the AP for the example to connect to.
 
         config ESP_WIFI_AP_PASSWORD
             string "WiFi AP Password"
-            default "mypassword"
+            default "12345678"
             help
                 WiFi password of the AP for the example to use.
 
@@ -121,31 +121,31 @@ menu "Device Configuration"
         menu "External port 1"
             config SENSOR_02_Pin_A0
                 int "Sensor 02 analog pin"
-                default 35
+                default 36
             
             config SENSOR_02_Pin_D0
                 int "Sensor 02 digital pin"
-                default 23
+                default 25
         endmenu
 
         menu "External port 2"
             config SENSOR_03_Pin_A0
                 int "Sensor 03 analog pin"
-                default 35
+                default 39
             
             config SENSOR_03_Pin_D0
                 int "Sensor 03 digital pin"
-                default 23
+                default 26
         endmenu
 
         menu "External port 3"
             config SENSOR_04_Pin_A0
                 int "Sensor 04 analog pin"
-                default 35
+                default 34
             
             config SENSOR_04_Pin_D0
                 int "Sensor 04 digital pin"
-                default 23
+                default 27
         endmenu
 
         menu "External port 4"
@@ -155,23 +155,23 @@ menu "Device Configuration"
             
             config SENSOR_05_Pin_D0
                 int "Sensor 05 digital pin"
-                default 23
+                default 14
         endmenu
 
         menu "External port 5"
             config SENSOR_06_Pin_A0
                 int "Sensor 06 analog pin"
-                default 35
+                default 32
             
             config SENSOR_06_Pin_D0
                 int "Sensor 06 digital pin"
-                default 23
+                default 13
         endmenu
 
         menu "External port 6"
             config SENSOR_07_Pin_A0
                 int "Sensor 07 analog pin"
-                default 35
+                default 33
             
             config SENSOR_07_Pin_D0
                 int "Sensor 07 digital pin"
@@ -190,7 +190,7 @@ menu "Device Configuration"
         
         config SENSOR_02_TYPE
             int "Sensor S02 Type"
-            default 1
+            default 0
             range 0 4
             help 
                 sensor port 1 
@@ -203,7 +203,7 @@ menu "Device Configuration"
                 
         config SENSOR_03_TYPE
             int "Sensor S03 Type"
-            default 2
+            default 0
             range 0 4
             help 
                 sensor port 2
