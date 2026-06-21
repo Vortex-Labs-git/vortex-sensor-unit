@@ -66,11 +66,6 @@ void send_device_info(void) {
 void send_sensorunit_data(void) {
     if (esp_server == NULL) return;
 
-    AHT10Sensor in_snap;
-    xSemaphoreTake(InbuildsensorMutex, portMAX_DELAY);
-    in_snap = aht10Sensor;
-    xSemaphoreGive(InbuildsensorMutex);
-
     char timestamp[20];
     get_current_timestamp(timestamp, sizeof(timestamp));
 
@@ -86,6 +81,10 @@ void send_sensorunit_data(void) {
 
     int sensor_count = 0;
 
+    AHT10Sensor in_snap;
+    xSemaphoreTake(InbuildsensorMutex, portMAX_DELAY);
+    in_snap = aht10Sensor;
+    xSemaphoreGive(InbuildsensorMutex);
     /* ----------------------------------------------------
      * Sensor 1 : Built-in Temperature (always present)
      * ---------------------------------------------------- */
@@ -120,7 +119,6 @@ void send_sensorunit_data(void) {
      * External sensors S02-S07
      * Only add available sensors
      * ---------------------------------------------------- */
-
     SensorMap ex_snap;
     xSemaphoreTake(ExternalsensorMutex, portMAX_DELAY);
     ex_snap = sensorMap;
