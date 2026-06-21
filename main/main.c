@@ -11,7 +11,7 @@
 #include "esp_netif.h"
 #include "nvs_flash.h"
 
-
+#include "time_fn/time_func.h"
 #include "eeprom_fn/wifi_storage.h"
 #include "eeprom_fn/sensor_config.h"
 #include "wifi_fn/vortex_wifi.h"
@@ -52,11 +52,10 @@ void app_main(void)
     wifi_storage_load();
     sensor_config_load();
 
-    // time_module_init();
-
     init_sensor_unit();
+    wifi_init_smart_mode();
 
-    // wifi_init_smart_mode();
+    xTaskCreate( obtain_time, "obtain_time", 4096, NULL, 5, NULL);
 
     xTaskCreate( external_sensor_task, "external_sensor_task", 4096, NULL, 5, NULL);
 

@@ -23,6 +23,7 @@ typedef enum {
 typedef struct {
     char sensor_id[5];
     sensor_type_t type;
+    char sensor_name[20];
 } sensor_map_t;
 
 typedef struct {
@@ -44,6 +45,7 @@ typedef struct {
     int raw;
     float value;
 } SensorData;
+
 typedef struct {
     bool available;
     char sensor_id[5];

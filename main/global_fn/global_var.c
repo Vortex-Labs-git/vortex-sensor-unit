@@ -32,12 +32,12 @@ GetWifi wifiStaData = {
 
 GetSensors UnitSensorConfig = {
     .sensors = {
-        {"S02", SENSOR_TEMP},
-        {"S03", SENSOR_MOISTURE},
-        {"S04", SENSOR_NONE},
-        {"S05", SENSOR_NONE},
-        {"S06", SENSOR_NONE},
-        {"S07", SENSOR_NONE},
+        {"S02", SENSOR_TEMP, "Temp 1"},
+        {"S03", SENSOR_MOISTURE, "Moisture 1"},
+        {"S04", SENSOR_NONE, ""},
+        {"S05", SENSOR_NONE, ""},
+        {"S06", SENSOR_NONE, ""},
+        {"S07", SENSOR_NONE, ""},
     }
 };
 

@@ -24,6 +24,8 @@
 #include "eeprom_fn/wifi_storage.h"
 #include "sensor_fn/led_indicators.h"
 #include "sensor_fn/sensor_process.h"
+#include "websocket_fn/websocket_server_fn.h"
+#include "mqtt_fn/mqtt_client_fn.h"
 
 
 /* ========================== CONFIGURATION MACROS ========================== */
@@ -103,7 +105,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 
         /* Stop MQTT */
         if (mqtt_running) {
-            // stop_mqtt_client();
+            stop_mqtt_client();
             mqtt_running = false;
         }
 
@@ -155,13 +157,13 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 
         /* Stop Webserver if running */
         if (web_running) {
-            // stop_webserver();
+            stop_webserver();
             web_running = false;
         }
 
         /* Start MQTT */
         if (!mqtt_running) {
-            // start_mqtt_client();
+            start_mqtt_client();
             mqtt_running = true;
         }
 
@@ -181,13 +183,13 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         
         /* Stop MQTT if running */
         if (mqtt_running) {
-            // stop_mqtt_client();
+            stop_mqtt_client();
             mqtt_running = false;
         }
 
         /* Start Webserver */
         if (!web_running) {
-            // start_webserver();
+            start_webserver();
             web_running = true;
         }
 
@@ -223,7 +225,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
             
             /* Stop Webserver */
             if (web_running) {
-                // stop_webserver();
+                stop_webserver();
                 web_running = false;
             }
 
