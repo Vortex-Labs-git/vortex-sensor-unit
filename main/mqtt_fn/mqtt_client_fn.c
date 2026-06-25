@@ -182,20 +182,6 @@ static void mqtt_event_handler(void *handler_args, esp_event_base_t base, int32_
             ESP_LOGI(TAG, "MQTT connected");
             mqtt_connected = true;
 
-            // subscribe process init
-            char topic_cmd_data[128];
-            char topic_control_data[128];
-
-            snprintf(topic_cmd_data, sizeof(topic_cmd_data), "%s/cmd_data", BASE_TOPIC);
-            snprintf(topic_control_data, sizeof(topic_control_data), "%s/control_data", BASE_TOPIC);
-
-            esp_mqtt_client_subscribe(client, topic_cmd_data, 0);
-            esp_mqtt_client_subscribe(client, topic_control_data, 0);
-
-            ESP_LOGI(TAG, "Subscribed to:");
-            ESP_LOGI(TAG, "  %s", topic_cmd_data);
-            ESP_LOGI(TAG, "  %s", topic_control_data);
-
             break;
 
         case MQTT_EVENT_DISCONNECTED:
