@@ -42,7 +42,7 @@ static const char *WEB_STATE_TAG = "STATE UPDATE OFFLINE";
 void send_device_info(void) {
     if (esp_server == NULL) return;
 
-    char timestamp[20];
+    char timestamp[32];
     get_current_timestamp(timestamp, sizeof(timestamp));
 
     // Create the JSON object
@@ -69,7 +69,7 @@ void send_device_info(void) {
 void send_sensorunit_data(void) {
     if (esp_server == NULL) return;
 
-    char timestamp[20];
+    char timestamp[32];
     get_current_timestamp(timestamp, sizeof(timestamp));
 
     // Create the JSON object
@@ -167,7 +167,7 @@ void send_sensorunit_data(void) {
 void get_sensorunit_config(void) {
     if (esp_server == NULL) return;
 
-    char timestamp[20];
+    char timestamp[32];
     get_current_timestamp(timestamp, sizeof(timestamp));
 
     // Create the JSON object
@@ -247,7 +247,7 @@ esp_err_t set_sensorunit_config(cJSON *sensor_data, cJSON *no_sensors)
         return ESP_ERR_INVALID_ARG;
     }
 
-    static const GetSensors DefaultSensorConfig = {
+    GetSensors DefaultSensorConfig = {
         .sensors = {
             {"S02", SENSOR_NONE, ""},
             {"S03", SENSOR_NONE, ""},
@@ -257,7 +257,6 @@ esp_err_t set_sensorunit_config(cJSON *sensor_data, cJSON *no_sensors)
             {"S07", SENSOR_NONE, ""},
         }
     };
-    memcpy(&UnitSensorConfig, &DefaultSensorConfig, sizeof(UnitSensorConfig));
 
     cJSON *sensor = NULL;
     int updated_count = 0;
@@ -277,10 +276,10 @@ esp_err_t set_sensorunit_config(cJSON *sensor_data, cJSON *no_sensors)
         }
 
         for (int i = 0; i < 6; i++) {
-            if (strcmp(UnitSensorConfig.sensors[i].sensor_id, sensor_id->valuestring) == 0) {
-                UnitSensorConfig.sensors[i].type = string_to_sensor_type(sensor_type->valuestring);
-                strncpy( UnitSensorConfig.sensors[i].sensor_name, sensor_name->valuestring, sizeof(UnitSensorConfig.sensors[i].sensor_name) - 1);
-                UnitSensorConfig.sensors[i].sensor_name[sizeof(UnitSensorConfig.sensors[i].sensor_name) - 1] = '\0';
+            if (strcmp(DefaultSensorConfig.sensors[i].sensor_id, sensor_id->valuestring) == 0) {
+                DefaultSensorConfig.sensors[i].type = string_to_sensor_type(sensor_type->valuestring);
+                strncpy( DefaultSensorConfig.sensors[i].sensor_name, sensor_name->valuestring, sizeof(DefaultSensorConfig.sensors[i].sensor_name) - 1);
+                DefaultSensorConfig.sensors[i].sensor_name[sizeof(DefaultSensorConfig.sensors[i].sensor_name) - 1] = '\0';
                 updated_count++;
 
                 break;
@@ -290,13 +289,14 @@ esp_err_t set_sensorunit_config(cJSON *sensor_data, cJSON *no_sensors)
     }
 
     for (int i = 0; i < 6; i++) {
-        ESP_LOGI(WEB_STATE_TAG, "Sensor[%d]: id=%s, type=%d, name=%s", i, UnitSensorConfig.sensors[i].sensor_id, UnitSensorConfig.sensors[i].type, UnitSensorConfig.sensors[i].sensor_name);
+        ESP_LOGI(WEB_STATE_TAG, "Sensor[%d]: id=%s, type=%d, name=%s", i, DefaultSensorConfig.sensors[i].sensor_id, DefaultSensorConfig.sensors[i].type, DefaultSensorConfig.sensors[i].sensor_name);
     }
 
     if (updated_count == 0) {
         return ESP_ERR_NOT_FOUND;
     }
 
+    memcpy(&UnitSensorConfig, &DefaultSensorConfig, sizeof(GetSensors));
     return ESP_OK;
 }
 
@@ -409,24 +409,24 @@ void offline_data(cJSON *event, cJSON *json) {
 
             if (!cJSON_IsString(ssid) || !cJSON_IsString(password)) {
                 ESP_LOGE(WEB_STATE_TAG, "Invalid WiFi JSON format");
-            }
-
-            if (strcmp(wifiStaData.ssid, ssid->valuestring) != 0 || strcmp(wifiStaData.password, password->valuestring) != 0) {
-                memset(wifiStaData.ssid, 0, sizeof(wifiStaData.ssid));
-                memset(wifiStaData.password, 0, sizeof(wifiStaData.password));
-
-                strncpy(wifiStaData.ssid, ssid->valuestring, sizeof(wifiStaData.ssid) - 1);
-                strncpy(wifiStaData.password, password->valuestring, sizeof(wifiStaData.password) - 1);
-
-                wifiStaData.set_wifi = true;
-
-                wifi_storage_save();
-
-                ESP_LOGI(WEB_STATE_TAG, "WiFi updated. Restarting...");
-                esp_restart();
-
             } else {
-                ESP_LOGI(WEB_STATE_TAG, "WiFi data unchanged. No action taken.");
+                if (strcmp(wifiStaData.ssid, ssid->valuestring) != 0 || strcmp(wifiStaData.password, password->valuestring) != 0) {
+                    memset(wifiStaData.ssid, 0, sizeof(wifiStaData.ssid));
+                    memset(wifiStaData.password, 0, sizeof(wifiStaData.password));
+
+                    strncpy(wifiStaData.ssid, ssid->valuestring, sizeof(wifiStaData.ssid) - 1);
+                    strncpy(wifiStaData.password, password->valuestring, sizeof(wifiStaData.password) - 1);
+
+                    wifiStaData.set_wifi = true;
+
+                    wifi_storage_save();
+
+                    ESP_LOGI(WEB_STATE_TAG, "WiFi updated. Restarting...");
+                    esp_restart();
+
+                } else {
+                    ESP_LOGI(WEB_STATE_TAG, "WiFi data unchanged. No action taken.");
+                }
             }
 
         } else {
