@@ -54,11 +54,8 @@ void app_main(void)
 #endif
 
 #if CONFIG_SENSOR_CONFIG_RESET
-    wifi_storage_restore_default();
+    sensor_config_restore_default();
 #endif
-
-    wifi_storage_load();
-    sensor_config_load();
 
 
     InbuildsensorMutex = xSemaphoreCreateMutex();
@@ -73,8 +70,14 @@ void app_main(void)
         return;
     }
 
+
+    wifi_storage_load();
+    sensor_config_load();
+
     
     init_sensor_unit();
+
+
     wifi_init_smart_mode();
 
     xTaskCreate( obtain_time, "obtain_time", 4096, NULL, 5, NULL);
