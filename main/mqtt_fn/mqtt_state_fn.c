@@ -6,12 +6,77 @@
 
 #include "time_fn/time_func.h"
 #include "global_fn/global_var.h"
+#include "ota_fn/ota_update_fn.h"
 #include "sensor_fn/external_sensor.h"
 #include "mqtt_state_fn.h"
 
 
 
 static const char *TAG = "MQTT_STATE";
+
+
+
+
+
+/*===============================================================
+ *              HANDLE BASIC COMMAND DATA (cmd_data)
+ *==============================================================*/
+void mqtt_handle_cmd_data(const char *data) {
+    cJSON *json_cmd_data = cJSON_Parse(data);
+
+    if (json_cmd_data == NULL) {
+        ESP_LOGE(TAG, "Invalid JSON received");
+        return;
+    }
+
+    // Extract top-level fields
+    cJSON *event = cJSON_GetObjectItem(json_cmd_data, "event");
+    cJSON *device_id = cJSON_GetObjectItem(json_cmd_data, "device_id");
+
+    /*----------------- OTA Update Request -----------------*/
+    cJSON *ota_update = cJSON_GetObjectItem(json_cmd_data, "ota_update");
+    if (cJSON_IsObject(ota_update)) {
+        cJSON *url = cJSON_GetObjectItem(ota_update, "url");
+        cJSON *version = cJSON_GetObjectItem(ota_update, "version");
+
+        if (cJSON_IsString(url) && cJSON_IsString(version)) {
+            ESP_LOGI(TAG, "OTA request: v%s from %s", version->valuestring, url->valuestring);
+            ota_start(url->valuestring, version->valuestring);
+        }
+    }
+
+    cJSON_Delete(json_cmd_data);
+}
+
+
+
+/*===============================================================
+ *                 GENERIC TOPIC ROUTER
+ *==============================================================*/
+void mqtt_handle_topic(const char *data) {
+    cJSON *json_data = cJSON_Parse(data);
+
+    if (json_data == NULL) {
+        ESP_LOGE(TAG, "Invalid JSON received");
+        return;
+    }
+
+    cJSON *event = cJSON_GetObjectItem(json_data, "event");
+    if (cJSON_IsString(event)) {
+        ESP_LOGI(TAG, "Received event: %s", event->valuestring);
+    } else {
+        ESP_LOGW(TAG, "Event field missing or not a string");
+    }
+
+    if (strcmp(event->valuestring, "set_valve_basic") == 0) {
+        mqtt_handle_cmd_data(data);
+
+    } else {
+        ESP_LOGW(TAG, "Unknown event type: %s", event->valuestring);
+    }
+
+    cJSON_Delete(json_data);
+}
 
 
 
