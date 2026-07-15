@@ -254,8 +254,13 @@ esp_err_t aht10_read_sensor(AHT10Sensor *sensor)
     }
 
     xSemaphoreTake(InbuildsensorMutex, portMAX_DELAY);
-    sensor->temperature = temperature;
-    sensor->humidity = humidity;
+    if (ret == ESP_OK) {
+        sensor->temperature = temperature;
+        sensor->humidity = humidity;
+        sensor->error_msg[0] = '\0';
+    } else {
+        strlcpy(sensor->error_msg, esp_err_to_name(ret), sizeof(sensor->error_msg));
+    }
     xSemaphoreGive(InbuildsensorMutex);
 
     return ESP_OK;
