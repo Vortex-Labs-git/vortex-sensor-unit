@@ -131,11 +131,6 @@ void obtain_time(void *pvParameters)
  *
  * Example:
  *     2026-02-18T14:25:30Z
- *
- * @param[out] timestamp        Pointer to buffer to store formatted string
- * @param[in]  timestamp_size   Size of the buffer
- *
- * @note Ensure buffer size is at least 25 bytes to safely hold ISO string.
  */
 void get_current_timestamp(char *timestamp, size_t timestamp_size) {
     time_t rawtime;

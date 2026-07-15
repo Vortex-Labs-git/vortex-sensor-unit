@@ -32,7 +32,7 @@ static const char *TAG = "MQTT_STATE";
 cJSON* create_sensorunit_status() {
     cJSON *json = cJSON_CreateObject();
 
-    char timestamp[20];
+    char timestamp[32];
     get_current_timestamp(timestamp, sizeof(timestamp));
 
     cJSON_AddStringToObject(json, "event", "sensor_unit_status");
@@ -58,7 +58,7 @@ cJSON* create_sensorunit_state_data() {
     // Create the JSON object
     cJSON *json = cJSON_CreateObject();
 
-    char timestamp[20];
+    char timestamp[32];
     get_current_timestamp(timestamp, sizeof(timestamp));
 
     cJSON_AddStringToObject(json, "event", "sensor_unit_info");
@@ -152,7 +152,7 @@ cJSON* create_sensorunit_error() {
 
     cJSON *json = cJSON_CreateObject();
 
-    char timestamp[20];
+    char timestamp[32];
     get_current_timestamp(timestamp, sizeof(timestamp));
 
     cJSON_AddStringToObject(json, "event", "sensor_unit_error");
