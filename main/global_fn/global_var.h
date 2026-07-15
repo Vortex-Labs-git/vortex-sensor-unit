@@ -11,6 +11,13 @@ extern SemaphoreHandle_t ExternalsensorMutex ;
 
 
 
+// Define the structure for device data
+typedef struct {
+    char device_id[32];
+    char ap_ssid[64];
+} DeviceIdentity;
+
+
 // Define the structure for get_wifi
 typedef struct {
     char ssid[32];
@@ -73,6 +80,7 @@ typedef struct {
 
 
 // Declare the global variables
+extern DeviceIdentity deviceIdentity;
 extern GetWifi wifiStaData;
 extern GetSensors UnitSensorConfig;
 extern AHT10Sensor aht10Sensor;

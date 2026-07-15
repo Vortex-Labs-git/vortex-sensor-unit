@@ -20,9 +20,6 @@
  * Configuration
  *--------------------------------------------------------------*/
 
-// Device ID from menuconfig
-#define DEVICE_ID CONFIG_SENSOR_UNIT_ID
-
 // WebSocket authentication passkey (menuconfig)
 #define PASSKEY_VALUE CONFIG_WS_PASSKEY_VALUE
 
@@ -49,7 +46,7 @@ void send_device_info(void) {
     cJSON *json = cJSON_CreateObject();
     cJSON_AddStringToObject(json, "event", "device_info");
     cJSON_AddStringToObject(json, "timestamp", timestamp);
-    cJSON_AddStringToObject(json, "device_id", DEVICE_ID);
+    cJSON_AddStringToObject(json, "device_id", deviceIdentity.device_id);
 
     // Convert the JSON object to string (allocate memory)
     char *json_string = cJSON_PrintUnformatted(json);
@@ -76,7 +73,7 @@ void send_sensorunit_data(void) {
     cJSON *json = cJSON_CreateObject();
 
     cJSON_AddStringToObject(json, "event", "sensor_unit_info");
-    cJSON_AddStringToObject(json, "device_id", DEVICE_ID);
+    cJSON_AddStringToObject(json, "device_id", deviceIdentity.device_id);
     cJSON_AddStringToObject(json, "device_name", "device name");
     cJSON_AddStringToObject(json, "timestamp", timestamp);
 
@@ -174,7 +171,7 @@ void get_sensorunit_config(void) {
     cJSON *json = cJSON_CreateObject();
 
     cJSON_AddStringToObject(json, "event", "get_sensor_config");
-    cJSON_AddStringToObject(json, "device_id", DEVICE_ID);
+    cJSON_AddStringToObject(json, "device_id", deviceIdentity.device_id);
     cJSON_AddStringToObject(json, "timestamp", timestamp);
 
     cJSON *sensor_array = cJSON_CreateArray();
@@ -327,7 +324,7 @@ void offline_data(cJSON *event, cJSON *json) {
             cJSON *user_id = cJSON_GetObjectItem(data, "user_id");
             cJSON *device_id = cJSON_GetObjectItem(data, "device_id");
             if (device_id != NULL && cJSON_IsString(device_id)) {
-                if (strcmp(device_id->valuestring, DEVICE_ID) == 0) {
+                if (strcmp(device_id->valuestring, deviceIdentity.device_id) == 0) {
                     ESP_LOGI(WEB_STATE_TAG, "User send the correct device ID %s, user ID %s", device_id->valuestring, user_id->valuestring);
                     send_sensorunit_data();
                     ESP_LOGI(WEB_STATE_TAG, "Send send_sensorunit_data");
@@ -347,7 +344,7 @@ void offline_data(cJSON *event, cJSON *json) {
 
         cJSON *device_id = cJSON_GetObjectItem(json, "device_id");
         if (device_id != NULL && cJSON_IsString(device_id)) {
-            if (strcmp(device_id->valuestring, DEVICE_ID) == 0) {
+            if (strcmp(device_id->valuestring, deviceIdentity.device_id) == 0) {
                 ESP_LOGI(WEB_STATE_TAG, "User send the correct device ID %s", device_id->valuestring);
                 get_sensorunit_config();
                 ESP_LOGI(WEB_STATE_TAG, "Send get_sensorunit_config");
@@ -364,7 +361,7 @@ void offline_data(cJSON *event, cJSON *json) {
 
         cJSON *device_id = cJSON_GetObjectItem(json, "device_id");
         if (device_id != NULL && cJSON_IsString(device_id)) {
-            if (strcmp(device_id->valuestring, DEVICE_ID) == 0) {
+            if (strcmp(device_id->valuestring, deviceIdentity.device_id) == 0) {
                 ESP_LOGI(WEB_STATE_TAG, "User send the correct device ID %s", device_id->valuestring);
                 
                 cJSON *sensor_data = cJSON_GetObjectItem(json, "sensor_data");

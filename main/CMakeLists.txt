@@ -2,6 +2,7 @@ idf_component_register(SRCS
                         "main.c"
                         "wifi_fn/vortex_wifi.c"
                         "global_fn/global_var.c"
+                        "eeprom_fn/id_storage.c"
                         "eeprom_fn/wifi_storage.c"
                         "eeprom_fn/sensor_config.c"
                         "time_fn/time_func.c"

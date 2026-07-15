@@ -10,12 +10,6 @@
 #include "mqtt_state_fn.h"
 
 
-/*---------------------------------------------------------------
- * Configuration
- *--------------------------------------------------------------*/
-
-// Device ID configured from menuconfig
-#define DEVICE_ID CONFIG_SENSOR_UNIT_ID
 
 static const char *TAG = "MQTT_STATE";
 
@@ -37,7 +31,7 @@ cJSON* create_sensorunit_status() {
 
     cJSON_AddStringToObject(json, "event", "sensor_unit_status");
     cJSON_AddStringToObject(json, "timestamp", timestamp);
-    cJSON_AddStringToObject(json, "device_id", DEVICE_ID);
+    cJSON_AddStringToObject(json, "device_id", deviceIdentity.device_id);
     cJSON_AddStringToObject(json, "status", "online");
 
     return json;
@@ -62,7 +56,7 @@ cJSON* create_sensorunit_state_data() {
     get_current_timestamp(timestamp, sizeof(timestamp));
 
     cJSON_AddStringToObject(json, "event", "sensor_unit_info");
-    cJSON_AddStringToObject(json, "device_id", DEVICE_ID);
+    cJSON_AddStringToObject(json, "device_id", deviceIdentity.device_id);
     cJSON_AddStringToObject(json, "device_name", "device name");
     cJSON_AddStringToObject(json, "timestamp", timestamp);
 
@@ -157,7 +151,7 @@ cJSON* create_sensorunit_error() {
 
     cJSON_AddStringToObject(json, "event", "sensor_unit_error");
     cJSON_AddStringToObject(json, "timestamp", timestamp);
-    cJSON_AddStringToObject(json, "device_id", DEVICE_ID);
+    cJSON_AddStringToObject(json, "device_id", deviceIdentity.device_id);
 
     cJSON *error_array = cJSON_CreateArray();
 

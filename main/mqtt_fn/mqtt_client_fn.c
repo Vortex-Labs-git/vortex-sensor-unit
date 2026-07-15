@@ -3,6 +3,7 @@
 #include "cJSON.h"
 #include "mqtt_client.h"
 
+#include "global_fn/global_var.h"
 #include "mqtt_client_fn.h"
 #include "mqtt_state_fn.h"
 
@@ -14,11 +15,10 @@
 // MQTT Broker URI (set in menuconfig)
 #define MQTT_BROKER_URI CONFIG_MQTT_BROKER_URI
 // #define MQTT_BROKER_URI  "mqtts://82.29.161.52:8883"
-#define DEVICE_ID CONFIG_SENSOR_UNIT_ID
 
 // Base topic structure:
-// vortex_device/wifi_valve/<DEVICE_ID>
-#define BASE_TOPIC "vortex_device/sensor_unit/" DEVICE_ID
+// vortex_device/sensor_unit/<DEVICE_ID>
+static char base_topic[96];
 
 // Maximum allowed MQTT payload size
 #define MAX_MQTT_PAYLOAD 4096
@@ -71,7 +71,7 @@ static void mqtt_publish_message(const char *sub_topic, cJSON *message)
     // Construct full topic:
     // vortex_device/sensor_unit/<DEVICE_ID>/<sub_topic>
     char full_topic[128];
-    snprintf(full_topic, sizeof(full_topic), "%s/%s", BASE_TOPIC, sub_topic);
+    snprintf(full_topic, sizeof(full_topic), "%s/%s", base_topic, sub_topic);
 
     // ESP_LOGI(TAG, "Publishing to %s", full_topic);
     ESP_LOGI(TAG, "Publish Payload: %s", json_str);
@@ -293,10 +293,13 @@ void start_mqtt_client(void)
     }
 
     ESP_LOGI(TAG, "Starting MQTT client...");
+
+    snprintf(base_topic, sizeof(base_topic), "vortex_device/sensor_unit/%s", deviceIdentity.device_id);
+    ESP_LOGI(TAG, "Base topic: %s", base_topic);
     
     esp_mqtt_client_config_t mqtt_cfg = {
         .broker.address.uri = MQTT_BROKER_URI,
-        .credentials.client_id = DEVICE_ID,
+        .credentials.client_id = deviceIdentity.device_id,
         .broker.verification.certificate = (const char *)_binary_ca_cert_pem_start,
         .network.disable_auto_reconnect = false,
         .session.keepalive = 60,

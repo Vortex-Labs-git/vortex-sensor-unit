@@ -38,7 +38,6 @@
 
 
 /* AP Configuration */
-#define ESP_WIFI_AP_SSID                    CONFIG_ESP_WIFI_AP_SSID
 #define ESP_WIFI_AP_PASSWD                  CONFIG_ESP_WIFI_AP_PASSWORD
 #define ESP_WIFI_CHANNEL                    CONFIG_ESP_WIFI_AP_CHANNEL
 #define MAX_STA_CONN                        CONFIG_ESP_MAX_STA_CONN_AP
@@ -263,8 +262,7 @@ esp_netif_t *wifi_init_softap(void)
 
     wifi_config_t wifi_ap_config = {
         .ap = {
-            .ssid = ESP_WIFI_AP_SSID,
-            .ssid_len = strlen(ESP_WIFI_AP_SSID),
+            .ssid_len = strlen(deviceIdentity.ap_ssid),
             .channel = ESP_WIFI_CHANNEL,
             .password = ESP_WIFI_AP_PASSWD,
             .max_connection = MAX_STA_CONN,
@@ -274,6 +272,8 @@ esp_netif_t *wifi_init_softap(void)
             },
         },
     };
+    strlcpy((char *)wifi_ap_config.ap.ssid, deviceIdentity.ap_ssid, sizeof(wifi_ap_config.ap.ssid));
+
 
     if (strlen(ESP_WIFI_AP_PASSWD) == 0) {
         wifi_ap_config.ap.authmode = WIFI_AUTH_OPEN;
@@ -281,7 +281,7 @@ esp_netif_t *wifi_init_softap(void)
 
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_ap_config));
 
-    ESP_LOGI(TAG_AP, "wifi_init_softap finished. SSID:%s password:%s channel:%d", ESP_WIFI_AP_SSID, ESP_WIFI_AP_PASSWD, ESP_WIFI_CHANNEL);
+    ESP_LOGI(TAG_AP, "wifi_init_softap finished. SSID:%s password:%s channel:%d", deviceIdentity.ap_ssid, ESP_WIFI_AP_PASSWD, ESP_WIFI_CHANNEL);
 
     return esp_netif_ap;
 }

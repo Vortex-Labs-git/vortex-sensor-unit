@@ -12,6 +12,7 @@
 #include "nvs_flash.h"
 
 #include "time_fn/time_func.h"
+#include "eeprom_fn/id_storage.h"
 #include "eeprom_fn/wifi_storage.h"
 #include "eeprom_fn/sensor_config.h"
 #include "wifi_fn/vortex_wifi.h"
