@@ -49,6 +49,7 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
+    id_storage_load();
 
 #if CONFIG_ESP_WIFI_STA_MODE_RESET
     wifi_storage_restore_default();
