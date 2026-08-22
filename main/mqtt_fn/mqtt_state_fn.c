@@ -224,17 +224,14 @@ cJSON* create_sensorunit_error() {
     xSemaphoreTake(InbuildsensorMutex, portMAX_DELAY);
     in_snap = aht10Sensor;
     xSemaphoreGive(InbuildsensorMutex);
-    /* Built-in Temperature */
-    {
+    if (strlen(in_snap.error_msg) > 0) {
+        /* Built-in Temperature */
         cJSON *err = cJSON_CreateObject();
         cJSON_AddStringToObject(err, "sensor_id", "S00");
         cJSON_AddStringToObject(err, "error", in_snap.error_msg);
         cJSON_AddItemToArray(error_array, err);
-    }
 
-    /* Built-in Humidity */
-    {
-        cJSON *err = cJSON_CreateObject();
+        /* Built-in Humidity */
         cJSON_AddStringToObject(err, "sensor_id", "S01");
         cJSON_AddStringToObject(err, "error", in_snap.error_msg);
         cJSON_AddItemToArray(error_array, err);
@@ -248,6 +245,9 @@ cJSON* create_sensorunit_error() {
     xSemaphoreGive(ExternalsensorMutex);
     for (int i = 0; i < 6; i++) {
         if (!ex_snap.sensorS[i].available)
+            continue;
+
+        if (strlen(ex_snap.sensorS[i].error_msg) == 0)
             continue;
 
         cJSON *err = cJSON_CreateObject();

@@ -96,16 +96,7 @@ static void mqtt_publish_message(const char *sub_topic, cJSON *message)
  *        - status
  *        - error
  */
-void mqtt_publish_sensorunit_data( void) 
-{
-    // Create and publish state data
-    cJSON *sensorunit_state_data = create_sensorunit_state_data();
-    if (sensorunit_state_data == NULL) {
-        ESP_LOGE(TAG, "Failed to create Sensor unit state data");
-    } else {
-        mqtt_publish_message("state_data", sensorunit_state_data);
-        ESP_LOGI(TAG, "Sensor unit state data published");
-    }
+void mqtt_publish_sensorunit_data( void) {
     
     // Create and publish status data
     cJSON *sensorunit_status = create_sensorunit_status();
@@ -116,13 +107,27 @@ void mqtt_publish_sensorunit_data( void)
         ESP_LOGI(TAG, "Sensor unit status published");
     }
 
+    // Create and publish state data
+    cJSON *sensorunit_state_data = create_sensorunit_state_data();
+    if (sensorunit_state_data == NULL) {
+        ESP_LOGE(TAG, "Failed to create Sensor unit state data");
+    } else {
+        mqtt_publish_message("state_data", sensorunit_state_data);
+        ESP_LOGI(TAG, "Sensor unit state data published");
+    }
+
     // Create and publish error data
     cJSON *sensorunit_error = create_sensorunit_error();
     if (sensorunit_error == NULL) {
         ESP_LOGE(TAG, "Failed to create Sensor unit error");
     } else {
-        mqtt_publish_message("error", sensorunit_error);
-        ESP_LOGI(TAG, "Sensor unit error published");
+        cJSON *error_array = cJSON_GetObjectItem(sensorunit_error, "error");
+        if (cJSON_IsArray(error_array) && cJSON_GetArraySize(error_array) > 0) {
+            mqtt_publish_message("error", sensorunit_error);
+            ESP_LOGI(TAG, "Sensor unit error published");
+        } else {
+            ESP_LOGI(TAG, "No sensor errors, skipping publish");
+        }
     }
 
     cJSON_Delete(sensorunit_state_data);
