@@ -98,9 +98,11 @@ menu "Device Configuration"
 
         config AHT10_I2C_ADD
             int "AHT10 I2C address"
-            default 54
+            default 56
+            range 56 57
             help
-                I2C address of the sensor  (54 - 0x36)
+                I2C address of the sensor (56 = 0x38 default, 57 = 0x39 when
+                the address pad is tied high).
 
         config AHT10_READ_INTERVAL_MS
             int "AHT10 read interval in milliseconds"

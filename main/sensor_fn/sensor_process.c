@@ -67,10 +67,17 @@ void aht10_sensor_task(void *pvParameters)  {
     (void) pvParameters;
 
     while (1) {
-        if (aht10_read_sensor(&aht10Sensor) == ESP_OK) {
-            ESP_LOGI( PROCESS_TAG, "AHT10 temperature: %.2fC˚, humidity: %.2f %%", aht10Sensor.temperature, aht10Sensor.humidity);
+        esp_err_t ret = aht10_read_sensor(&aht10Sensor);
+
+        AHT10Sensor in_snap;
+        xSemaphoreTake(InbuildsensorMutex, portMAX_DELAY);
+        in_snap = aht10Sensor;
+        xSemaphoreGive(InbuildsensorMutex);
+
+        if (ret == ESP_OK) {
+            ESP_LOGI( PROCESS_TAG, "AHT10 temperature: %.2fC˚, humidity: %.2f %%", in_snap.temperature, in_snap.humidity);
         } else {
-            ESP_LOGE(PROCESS_TAG, "AHT10 read failed: %s", aht10Sensor.error_msg);
+            ESP_LOGE(PROCESS_TAG, "AHT10 read failed: %s", in_snap.error_msg);
         }
 
         vTaskDelay(pdMS_TO_TICKS(AHT10_READ_MS));
