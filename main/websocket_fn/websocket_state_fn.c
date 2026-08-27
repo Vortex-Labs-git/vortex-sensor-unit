@@ -91,7 +91,7 @@ void send_sensorunit_data(void) {
     {
         cJSON *sensor = cJSON_CreateObject();
 
-        cJSON_AddStringToObject(sensor, "sensor_id", "S01");
+        cJSON_AddStringToObject(sensor, "sensor_id", "S00");
         cJSON_AddStringToObject(sensor, "sensor_type", "Temperature");
         cJSON_AddStringToObject(sensor, "sensor_name", "Inbuild Temp");
         cJSON_AddNumberToObject(sensor, "sensor_value", in_snap.temperature);
@@ -106,7 +106,7 @@ void send_sensorunit_data(void) {
     {
         cJSON *sensor = cJSON_CreateObject();
 
-        cJSON_AddStringToObject(sensor, "sensor_id", "S02");
+        cJSON_AddStringToObject(sensor, "sensor_id", "S01");
         cJSON_AddStringToObject(sensor, "sensor_type", "Humidity");
         cJSON_AddStringToObject(sensor, "sensor_name", "inbuild humidity");
         cJSON_AddNumberToObject(sensor, "sensor_value", in_snap.humidity);
