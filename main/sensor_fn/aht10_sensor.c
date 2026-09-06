@@ -28,11 +28,11 @@
 #define AHT10_I2C_MASTER_FREQ_HZ   100000
 #define AHT10_I2C_TIMEOUT_MS       1000
 
-/* Calibration against a reference at the settled operating temperature.
- * The sensor reads high on both channels because it sits in the ESP32's
- * heat. Re-measure these if the sensor is ever moved off the board. */
-#define AHT10_TEMP_OFFSET_C        (-1.0f)
-#define AHT10_HUM_OFFSET_PCT       (-4.0f)
+// /* Calibration against a reference at the settled operating temperature.
+//  * The sensor reads high on both channels because it sits in the ESP32's
+//  * heat. Re-measure these if the sensor is ever moved off the board. */
+// #define AHT10_TEMP_OFFSET_C        (-1.0f)
+// #define AHT10_HUM_OFFSET_PCT       (-4.0f)
 
 
 static const char *TAG_AHT10 = "AHT10_SENSOR";
@@ -241,8 +241,8 @@ esp_err_t aht10_read(float *temperature, float *humidity)
     *humidity = ((float)raw_humidity * 100.0f) / 1048576.0f;
     *temperature = (((float)raw_temperature * 200.0f) / 1048576.0f) - 50.0f;
 
-    *temperature += AHT10_TEMP_OFFSET_C;
-    *humidity    += AHT10_HUM_OFFSET_PCT;
+    // *temperature += AHT10_TEMP_OFFSET_C;
+    // *humidity    += AHT10_HUM_OFFSET_PCT;
 
     if (*humidity < 0.0f) {
         *humidity = 0.0f;
