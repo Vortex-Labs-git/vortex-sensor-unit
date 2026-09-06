@@ -28,17 +28,72 @@
 #define AHT10_I2C_MASTER_FREQ_HZ   100000
 #define AHT10_I2C_TIMEOUT_MS       1000
 
-// /* Calibration against a reference at the settled operating temperature.
-//  * The sensor reads high on both channels because it sits in the ESP32's
-//  * heat. Re-measure these if the sensor is ever moved off the board. */
-// #define AHT10_TEMP_OFFSET_C        (-1.0f)
-// #define AHT10_HUM_OFFSET_PCT       (-4.0f)
-
 
 static const char *TAG_AHT10 = "AHT10_SENSOR";
 
 static i2c_port_t aht10_i2c_port = I2C_NUM_MAX;
 static bool aht10_ready = false;
+
+
+/* =================== MEDIAN FILTER =================== *
+ * Rejects single-sample spikes outright instead of smearing them into
+ * the output the way an average would. Window length MUST be odd.
+ *
+ * Time span covered = AHT10_FILTER_LEN x sample interval.
+ *   5 samples x 2000 ms = 10 s window.
+ */
+#define AHT10_FILTER_LEN 5
+
+typedef struct {
+    float   buf[AHT10_FILTER_LEN];
+    uint8_t count;
+    uint8_t head;
+} aht10_median_t;
+
+static aht10_median_t aht10_temp_filter;
+static aht10_median_t aht10_hum_filter;
+
+static void median_reset(aht10_median_t *f)
+{
+    f->count = 0;
+    f->head  = 0;
+}
+
+static void median_push(aht10_median_t *f, float value)
+{
+    f->buf[f->head] = value;
+    f->head = (uint8_t)((f->head + 1) % AHT10_FILTER_LEN);
+    if (f->count < AHT10_FILTER_LEN) {
+        f->count++;
+    }
+}
+
+/* Valid from the very first sample: with a partial window the median is
+ * taken over however many samples have arrived, so there is no startup
+ * gap where the published value is undefined. */
+static float median_value(const aht10_median_t *f)
+{
+    float   sorted[AHT10_FILTER_LEN];
+    uint8_t n = f->count;
+
+    if (n == 0) {
+        return 0.0f;
+    }
+
+    memcpy(sorted, f->buf, (size_t)n * sizeof(float));
+
+    for (uint8_t i = 1; i < n; i++) {          /* insertion sort, n <= 5 */
+        float key = sorted[i];
+        int   j   = (int)i - 1;
+        while (j >= 0 && sorted[j] > key) {
+            sorted[j + 1] = sorted[j];
+            j--;
+        }
+        sorted[j + 1] = key;
+    }
+
+    return sorted[n / 2];
+}
 
 
 
@@ -188,6 +243,10 @@ esp_err_t aht10_sensor_init(AHT10 *aht10) {
         return ret;
     }
 
+    /* Drop any samples buffered before this (re)init. */
+    median_reset(&aht10_temp_filter);
+    median_reset(&aht10_hum_filter);
+
     aht10_ready = true;
     ESP_LOGI(TAG_AHT10, "AHT10 initialized on I2C port %d", aht10->I2C_port);
 
@@ -241,18 +300,6 @@ esp_err_t aht10_read(float *temperature, float *humidity)
     *humidity = ((float)raw_humidity * 100.0f) / 1048576.0f;
     *temperature = (((float)raw_temperature * 200.0f) / 1048576.0f) - 50.0f;
 
-    // *temperature += AHT10_TEMP_OFFSET_C;
-    // *humidity    += AHT10_HUM_OFFSET_PCT;
-
-    if (*humidity < 0.0f) {
-        *humidity = 0.0f;
-    }
-    if (*humidity > 100.0f) {
-        *humidity = 100.0f;
-    }
-
-    return ESP_OK;
-
     return ESP_OK;
 }
 
@@ -263,23 +310,37 @@ esp_err_t aht10_read_sensor(AHT10Sensor *sensor)
     }
 
     float temperature = 0.0f;
-    float humidity = 0.0f;
+    float humidity    = 0.0f;
+    float filt_t      = 0.0f;
+    float filt_h      = 0.0f;
 
     esp_err_t ret = aht10_read(&temperature, &humidity);
-    if (ret != ESP_OK) {
-        ESP_LOGE(TAG_AHT10, "AHT10 read fail %s", esp_err_to_name(ret));
-        return ret;
-    }
 
     xSemaphoreTake(InbuildsensorMutex, portMAX_DELAY);
     if (ret == ESP_OK) {
-        sensor->temperature = temperature;
-        sensor->humidity = humidity;
+        median_push(&aht10_temp_filter, temperature);
+        median_push(&aht10_hum_filter, humidity);
+
+        filt_t = median_value(&aht10_temp_filter);
+        filt_h = median_value(&aht10_hum_filter);
+
+        sensor->temperature  = filt_t;
+        sensor->humidity     = filt_h;
         sensor->error_msg[0] = '\0';
     } else {
+        /* A bad sample is never pushed into the filter. The last good
+         * filtered value stays in place, but error_msg now marks it as
+         * stale so the MQTT / WebSocket consumers can tell. */
         strlcpy(sensor->error_msg, esp_err_to_name(ret), sizeof(sensor->error_msg));
     }
     xSemaphoreGive(InbuildsensorMutex);
 
-    return ESP_OK;
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG_AHT10, "AHT10 read fail %s", esp_err_to_name(ret));
+    } else {
+        ESP_LOGD(TAG_AHT10, "raw T=%.2f RH=%.2f -> filtered T=%.2f RH=%.2f",
+                 temperature, humidity, filt_t, filt_h);
+    }
+
+    return ret;
 }
