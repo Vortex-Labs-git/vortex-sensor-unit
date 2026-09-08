@@ -18,6 +18,7 @@
 #include "wifi_fn/vortex_wifi.h"
 #include "sensor_fn/external_sensor.h"
 #include "sensor_fn/sensor_process.h"
+#include "wifi_supervisor.h"
 
 
 
@@ -88,5 +89,5 @@ void app_main(void)
 
     xTaskCreate( aht10_sensor_task, "aht10_sensor_task", 4096, NULL, 5, NULL);
 
-
+    wifi_supervisor_start();
 }

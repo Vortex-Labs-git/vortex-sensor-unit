@@ -9,6 +9,7 @@ idf_component_register(SRCS
                         "time_fn/time_func.c"
                         "websocket_fn/websocket_server_fn.c"
                         "websocket_fn/websocket_state_fn.c"
+                        "wifi_supervisor.c"
                         "mqtt_fn/mqtt_client_fn.c"
                         "mqtt_fn/mqtt_state_fn.c"
                         "sensor_fn/led_indicators.c"
