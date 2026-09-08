@@ -1,7 +1,6 @@
 #ifndef TIME_FUNC_H
 #define TIME_FUNC_H
 
-#include <stddef.h>
 
 void set_manual_time(void);
 void obtain_time(void *pvParameters);

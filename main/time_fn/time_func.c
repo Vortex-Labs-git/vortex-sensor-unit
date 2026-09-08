@@ -9,6 +9,7 @@
  *  - Provides helper function to get ISO 8601 timestamps
  */
 
+ #include <stddef.h>
 #include <stdio.h>
 #include <time.h>
 #include "esp_sntp.h"
@@ -42,74 +43,61 @@ static const char *TAG_TIME = "TimeSync";
  * @note This function blocks until time is synchronized.
  *       Should be called after WiFi connection is established.
  */
-// void obtain_time(void)
-// {
-//     // Set the SNTP operating mode to polling
-//     sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    
-//     // Set SNTP server
-//     sntp_setservername(0, "pool.ntp.org");
-//     sntp_setservername(1, "time.nist.gov");
-//     sntp_setservername(2, "time.google.com");
-
-//     // Initialize the SNTP service
-//     sntp_init();
-
-//     setenv("TZ", "Asia/Colombo", 1);
-//     tzset();
-
-//     // get the correct time
-//     time_t now = 0;
-//     struct tm timeinfo = { 0 };
-//     while (timeinfo.tm_year < (2020 - 1900)) {
-//         ESP_LOGI(TAG_TIME, "Waiting for time to sync...");
-//         vTaskDelay(pdMS_TO_TICKS(2000));
-//         time(&now); // Get the current time
-//         localtime_r(&now, &timeinfo);
-//     }
-
-//     ESP_LOGI(TAG_TIME, "Time synchronized successfully");
-    
-//     ESP_LOGI(TAG_TIME, "Current time: %04d-%02d-%02d %02d:%02d:%02d",
-//              timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
-//              timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
-// }
-
+static bool s_sntp_started = false;   /* SNTP configured at least once */
+static bool s_sync_task_running = false;
 void obtain_time(void *pvParameters)
 {
     (void) pvParameters;
 
-    sntp_setoperatingmode(SNTP_OPMODE_POLL);
-    sntp_setservername(0, "pool.ntp.org");
-    sntp_setservername(1, "time.nist.gov");
-    sntp_setservername(2, "time.google.com");
-    sntp_init();
+    if (s_sync_task_running) {
+        ESP_LOGW(TAG_TIME, "Time sync task already running, skipping");
+        vTaskDelete(NULL);
+        return;
+    }
+    s_sync_task_running = true;
 
-    setenv("TZ", "IST-5:30", 1);
-    tzset();
+    if (!s_sntp_started) {
+        ESP_LOGI(TAG_TIME, "Initializing SNTP");
+        esp_sntp_setoperatingmode(ESP_SNTP_OPMODE_POLL);
+        esp_sntp_setservername(0, "pool.ntp.org");
+        esp_sntp_setservername(1, "time.nist.gov");
+        esp_sntp_setservername(2, "time.google.com");
+        esp_sntp_init();
+        s_sntp_started = true;
+    } else {
+        ESP_LOGI(TAG_TIME, "SNTP already running, restarting sync");
+        sntp_set_sync_status(SNTP_SYNC_STATUS_RESET);  /* force a fresh sync */
+        esp_sntp_restart();
+    }
+
 
     time_t now = 0;
     struct tm timeinfo = {0};
-    int retry_count = 0;
-    const int max_retries = 30; // ~1 minute timeout
+    
+    int retry = 0;
+    const int retry_count = 30;
 
-    while (timeinfo.tm_year < (2020 - 1900) && retry_count < max_retries) {
-        ESP_LOGI(TAG_TIME, "Waiting for time to sync...");
+    while (sntp_get_sync_status() == SNTP_SYNC_STATUS_RESET &&
+        retry < retry_count)
+    {
+        ESP_LOGI(TAG_TIME, "Waiting for SNTP sync...");
         vTaskDelay(pdMS_TO_TICKS(2000));
-        time(&now);
-        localtime_r(&now, &timeinfo);
-        retry_count++;
+        retry++;
     }
+
+    time(&now);
+    localtime_r(&now, &timeinfo);
 
     if (timeinfo.tm_year >= (2020 - 1900)) {
-        ESP_LOGI(TAG_TIME, "Time synchronized successfully");
-    } else {
-        ESP_LOGW(TAG_TIME, "Time sync failed, using default system time");
-    }
+        setenv("TZ", "IST-5:30", 1);
+        tzset();
 
-    ESP_LOGI(TAG_TIME, "Current time: %04d-%02d-%02d %02d:%02d:%02d",
-             timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday,
-             timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
+        ESP_LOGI(TAG_TIME, "NTP Time synchronized successfully");
+        ESP_LOGI(TAG_TIME, "Current ntp time: %04d-%02d-%02d %02d:%02d:%02d", timeinfo.tm_year + 1900, timeinfo.tm_mon + 1, timeinfo.tm_mday, timeinfo.tm_hour, timeinfo.tm_min, timeinfo.tm_sec);
+
+    } else {
+        ESP_LOGW(TAG_TIME, "NTP Time sync failed, using default system time");
+    }
 
     vTaskDelete(NULL); // Delete task after finishing
 }
@@ -130,11 +118,6 @@ void obtain_time(void *pvParameters)
  *
  * Example:
  *     2026-02-18T14:25:30Z
- *
- * @param[out] timestamp        Pointer to buffer to store formatted string
- * @param[in]  timestamp_size   Size of the buffer
- *
- * @note Ensure buffer size is at least 25 bytes to safely hold ISO string.
  */
 void get_current_timestamp(char *timestamp, size_t timestamp_size) {
     time_t rawtime;
