@@ -16,11 +16,13 @@ idf_component_register(SRCS
                         "sensor_fn/external_sensor.c"
                         "sensor_fn/sensor_process.c"
                         "sensor_fn/aht10_sensor.c"
+                        "webui_fn/webui_server.c"
                     INCLUDE_DIRS 
                         "."
                     EMBED_TXTFILES
                         "mqtt_fn/ca_cert.pem"
                         "ota_fn/ota_ca_cert.pem"
+                        "webui_fn/index.html"
                     REQUIRES
                         esp_wifi
                         mqtt 
