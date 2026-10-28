@@ -185,7 +185,7 @@ menu "Device Configuration"
         config SENSOR_02_TYPE
             int "Sensor S02 Type"
             default 0
-            range 0 4
+            range 0 5
             help 
                 sensor port 1 
 
@@ -194,11 +194,12 @@ menu "Device Configuration"
                 2 = SENSOR_MOISTURE
                 3 = SENSOR_HUMIDITY
                 4 = SENSOR_PH
+                5 = SENSOR_WATER_LEVEL
                 
         config SENSOR_03_TYPE
             int "Sensor S03 Type"
             default 0
-            range 0 4
+            range 0 5
             help 
                 sensor port 2
 
@@ -207,32 +208,33 @@ menu "Device Configuration"
                 2 = SENSOR_MOISTURE
                 3 = SENSOR_HUMIDITY
                 4 = SENSOR_PH
+                5 = SENSOR_WATER_LEVEL
 
         config SENSOR_04_TYPE
             int "Sensor S04 Type"
             default 0
-            range 0 4
+            range 0 5
             help 
                 sensor port 3
 
         config SENSOR_05_TYPE
             int "Sensor S05 Type"
             default 0
-            range 0 4
+            range 0 5
             help 
                 sensor port 4
 
         config SENSOR_06_TYPE
             int "Sensor S06 Type"
             default 0
-            range 0 4
+            range 0 5
             help 
                 sensor port 5
 
         config SENSOR_07_TYPE
             int "Sensor S07 Type"
             default 0
-            range 0 4
+            range 0 5
             help 
                 sensor port 6
     
