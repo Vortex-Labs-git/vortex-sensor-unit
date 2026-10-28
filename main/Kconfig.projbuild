@@ -3,15 +3,9 @@ menu "WiFi Mode Configuration"
     menu "SoftAP Configuration"
         comment "SoftAP Configuration"
 
-        config ESP_WIFI_AP_SSID
-            string "WiFi AP SSID"
-            default "myssid"
-            help
-                SSID (network name) of the AP for the example to connect to.
-
         config ESP_WIFI_AP_PASSWORD
             string "WiFi AP Password"
-            default "mypassword"
+            default "12345678"
             help
                 WiFi password of the AP for the example to use.
 
@@ -60,6 +54,7 @@ menu "WiFi Mode Configuration"
     endmenu
 endmenu
 
+
 menu "Device Configuration"
     menu "Device Data Configuration"
         comment "Device Data Configuration"
@@ -78,87 +73,6 @@ menu "Device Configuration"
 
     endmenu
 
-
-
-    menu "Default Port Sensor Configuration"
-        config SENSOR_CONFIG_RESET
-            bool "Reset Sensor config to Default"
-            default n
-            help
-                Reset Sensor config to default values.
-        
-        config SENSOR_02_TYPE
-            int "Sensor S02 Type"
-            default 1
-            range 0 4
-            help 
-                sensor port 1 
-
-                0 = SENSOR_NONE
-                1 = SENSOR_TEMP
-                2 = SENSOR_MOISTURE
-                3 = SENSOR_HUMIDITY
-                4 = SENSOR_PH
-                
-        config SENSOR_03_TYPE
-            int "Sensor S03 Type"
-            default 2
-            range 0 4
-            help 
-                sensor port 2
-
-                0 = SENSOR_NONE
-                1 = SENSOR_TEMP
-                2 = SENSOR_MOISTURE
-                3 = SENSOR_HUMIDITY
-                4 = SENSOR_PH
-
-        config SENSOR_04_TYPE
-            int "Sensor S04 Type"
-            default 0
-            range 0 4
-            help 
-                sensor port 3
-
-        config SENSOR_05_TYPE
-            int "Sensor S05 Type"
-            default 0
-            range 0 4
-            help 
-                sensor port 4
-
-        config SENSOR_06_TYPE
-            int "Sensor S06 Type"
-            default 0
-            range 0 4
-            help 
-                sensor port 5
-
-        config SENSOR_07_TYPE
-            int "Sensor S07 Type"
-            default 0
-            range 0 4
-            help 
-                sensor port 6
-    
-    endmenu
-
-
-    menu "LED Indicators Configuration"
-        comment "LED Indicators Configuration"
-
-        config RED_LED_PIN
-            int "RED LED PIN"
-            default 17
-            help
-                Red LED pin number.
-
-        config GREEN_LED_PIN
-            int "GREEN LED PIN"
-            default 16
-            help
-                Green LED pin number.
-    endmenu
 
     menu "AHT10 Sensor Configuration"
         comment "AHT10 Sensor Configuration"
@@ -182,6 +96,12 @@ menu "Device Configuration"
             help
                 GPIO pin connected to AHT10 SCL.
 
+        config AHT10_I2C_ADD
+            int "AHT10 I2C address"
+            default 54
+            help
+                I2C address of the sensor  (54 - 0x36)
+
         config AHT10_READ_INTERVAL_MS
             int "AHT10 read interval in milliseconds"
             default 2000
@@ -189,6 +109,154 @@ menu "Device Configuration"
             help
                 How often the firmware reads and logs AHT10 temperature and humidity.
     endmenu
+
+
+    menu "External Sensor Pin Configuration"
+        menu "External port 1"
+            config SENSOR_02_Pin_A0
+                int "Sensor 02 analog pin"
+                default 36
+            
+            config SENSOR_02_Pin_D0
+                int "Sensor 02 digital pin"
+                default 25
+        endmenu
+
+        menu "External port 2"
+            config SENSOR_03_Pin_A0
+                int "Sensor 03 analog pin"
+                default 39
+            
+            config SENSOR_03_Pin_D0
+                int "Sensor 03 digital pin"
+                default 26
+        endmenu
+
+        menu "External port 3"
+            config SENSOR_04_Pin_A0
+                int "Sensor 04 analog pin"
+                default 34
+            
+            config SENSOR_04_Pin_D0
+                int "Sensor 04 digital pin"
+                default 27
+        endmenu
+
+        menu "External port 4"
+            config SENSOR_05_Pin_A0
+                int "Sensor 05 analog pin"
+                default 35
+            
+            config SENSOR_05_Pin_D0
+                int "Sensor 05 digital pin"
+                default 14
+        endmenu
+
+        menu "External port 5"
+            config SENSOR_06_Pin_A0
+                int "Sensor 06 analog pin"
+                default 32
+            
+            config SENSOR_06_Pin_D0
+                int "Sensor 06 digital pin"
+                default 13
+        endmenu
+
+        menu "External port 6"
+            config SENSOR_07_Pin_A0
+                int "Sensor 07 analog pin"
+                default 33
+            
+            config SENSOR_07_Pin_D0
+                int "Sensor 07 digital pin"
+                default 23
+        endmenu
+  
+    endmenu
+
+
+    menu "External Sensor Map Configuration"
+        config SENSOR_CONFIG_RESET
+            bool "Reset Sensor config to Default"
+            default n
+            help
+                Reset Sensor config to default values.
+        
+        config SENSOR_02_TYPE
+            int "Sensor S02 Type"
+            default 0
+            range 0 5
+            help 
+                sensor port 1 
+
+                0 = SENSOR_NONE
+                1 = SENSOR_TEMP
+                2 = SENSOR_MOISTURE
+                3 = SENSOR_HUMIDITY
+                4 = SENSOR_PH
+                5 = SENSOR_WATER_LEVEL
+                
+        config SENSOR_03_TYPE
+            int "Sensor S03 Type"
+            default 0
+            range 0 5
+            help 
+                sensor port 2
+
+                0 = SENSOR_NONE
+                1 = SENSOR_TEMP
+                2 = SENSOR_MOISTURE
+                3 = SENSOR_HUMIDITY
+                4 = SENSOR_PH
+                5 = SENSOR_WATER_LEVEL
+
+        config SENSOR_04_TYPE
+            int "Sensor S04 Type"
+            default 0
+            range 0 5
+            help 
+                sensor port 3
+
+        config SENSOR_05_TYPE
+            int "Sensor S05 Type"
+            default 0
+            range 0 5
+            help 
+                sensor port 4
+
+        config SENSOR_06_TYPE
+            int "Sensor S06 Type"
+            default 0
+            range 0 5
+            help 
+                sensor port 5
+
+        config SENSOR_07_TYPE
+            int "Sensor S07 Type"
+            default 0
+            range 0 5
+            help 
+                sensor port 6
+    
+    endmenu
+
+
+    menu "LED Indicators Configuration"
+        comment "LED Indicators Configuration"
+
+        config RED_LED_PIN
+            int "RED LED PIN"
+            default 17
+            help
+                Red LED pin number.
+
+        config GREEN_LED_PIN
+            int "GREEN LED PIN"
+            default 16
+            help
+                Green LED pin number.
+    endmenu
+
 
     menu "MQTT client Configuration"
         comment "MQTT client Configuration"

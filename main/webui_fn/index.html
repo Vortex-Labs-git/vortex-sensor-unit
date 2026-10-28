@@ -1,0 +1,683 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Vortex Sensor Unit</title>
+<style>
+/* No internet on the SoftAP — system fonts only, no webfont requests. */
+:root{
+  --scr:#131A1E; --c1:#1B242A; --c2:#232F36; --line:#2E3D45;
+  --fg:#E8EEF0; --fg2:#8FA1A8;
+  --copper:#C87F4A; --patina:#3FA796; --rust:#DD6152;
+  --r:14px;
+  --ui:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Roboto Mono",monospace;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--scr);color:var(--fg);font:15px/1.55 var(--ui);
+  -webkit-font-smoothing:antialiased}
+.hidden{display:none!important}
+button{font-family:inherit}
+button:focus-visible,input:focus-visible,select:focus-visible{
+  outline:2px solid var(--copper);outline-offset:2px}
+
+/* ---------- chrome ---------- */
+header{position:sticky;top:0;z-index:5;background:var(--scr);
+  border-bottom:1px solid var(--line);padding:12px 14px;
+  display:flex;align-items:center;gap:9px}
+#back{width:28px;height:28px;flex:none;border-radius:8px;border:1px solid var(--line);
+  background:var(--c1);color:var(--fg);display:grid;place-items:center;
+  font-size:16px;line-height:1;cursor:pointer;padding:0}
+h1{margin:0;font-size:16px;font-weight:600;flex:1;letter-spacing:-.01em}
+#dot{width:8px;height:8px;border-radius:50%;background:var(--fg2);flex:none}
+#dot.on{background:var(--patina)}
+#did{font-family:var(--mono);font-size:10px;color:var(--fg2)}
+main{max-width:520px;margin:0 auto;padding:14px;display:flex;
+  flex-direction:column;gap:14px}
+
+/* ---------- cards ---------- */
+.card{background:var(--c1);border:1px solid var(--line);border-radius:var(--r);
+  padding:14px;display:flex;flex-direction:column;gap:12px}
+.ttl{margin:0;font-family:var(--mono);font-size:10px;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--fg2);font-weight:400}
+
+/* ---------- unit summary ---------- */
+.unit{background:linear-gradient(180deg,#20303A,#1B242A);border:1px solid #334954;
+  border-radius:var(--r);padding:14px;display:flex;flex-direction:column}
+.urow{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 0;border-bottom:1px solid rgba(255,255,255,.055);font-size:13.5px}
+.urow:first-child{padding-top:0}
+.urow:last-child{border-bottom:0;padding-bottom:0}
+.urow .k{color:var(--fg2)}
+.urow .v{font-weight:600;text-align:right}
+.urow .v.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+.stat{display:inline-flex;align-items:center;gap:6px;font-weight:600;color:var(--rust)}
+.stat .d{width:8px;height:8px;border-radius:50%;background:var(--rust)}
+.stat.ok{color:var(--patina)}
+.stat.ok .d{background:var(--patina)}
+
+/* ---------- in-build pair ---------- */
+.duo{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.big{background:var(--c2);border:1px solid var(--line);border-radius:12px;
+  padding:12px;display:flex;flex-direction:column;gap:3px}
+.big .k{font-family:var(--mono);font-size:9.5px;letter-spacing:.13em;
+  text-transform:uppercase;color:var(--fg2)}
+.big .n{font-family:var(--mono);font-size:29px;font-weight:600;line-height:1.1;
+  font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.big .n u{text-decoration:none;font-size:15px;color:var(--fg2);margin-left:2px}
+.big .t{font-size:11px;color:var(--fg2);overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap}
+.big.t1 .n{color:var(--copper)}
+.big.t2 .n{color:var(--patina)}
+
+/* ---------- external sensors ---------- */
+.sen{background:var(--c1);border:1px solid var(--line);border-radius:12px;
+  padding:12px 13px;display:flex;flex-direction:column;gap:8px}
+.srow{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+  font-size:13px}
+.srow .k{color:var(--fg2);flex:none}
+.srow .v{font-weight:600;text-align:right;min-width:0;word-break:break-word}
+.srow .v.num{font-family:var(--mono);font-size:17px;color:var(--copper);
+  font-variant-numeric:tabular-nums}
+.sid{font-family:var(--mono);font-size:10px;color:var(--fg2);
+  border:1px solid var(--line);border-radius:5px;padding:1px 6px;margin-left:5px}
+.empty{text-align:center;color:var(--fg2);font-size:13px;padding:18px 10px;
+  border:1px dashed var(--line);border-radius:12px;line-height:1.5}
+
+/* ---------- nav ---------- */
+.nav{display:flex;flex-direction:column;gap:9px}
+.navbtn{display:flex;align-items:center;gap:11px;background:var(--c1);
+  border:1px solid var(--line);border-radius:var(--r);padding:14px;cursor:pointer;
+  color:var(--fg);text-align:left;width:100%}
+.navbtn .ico{width:34px;height:34px;flex:none;border-radius:9px;background:var(--c2);
+  border:1px solid var(--line);display:grid;place-items:center;font-size:17px}
+.navbtn .txt{flex:1;display:flex;flex-direction:column}
+.navbtn .txt b{font-size:14px;font-weight:600}
+.navbtn .txt span{font-size:11.5px;color:var(--fg2)}
+.navbtn .arw{color:var(--fg2);font-size:17px}
+
+/* ---------- buttons ---------- */
+.btn{border:1px solid var(--line);background:var(--c2);color:var(--fg);
+  font:600 14px var(--ui);padding:12px 10px;border-radius:10px;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;gap:7px;width:100%}
+.btn.prime{background:var(--copper);border-color:var(--copper);color:#12181A}
+.btn.danger{background:var(--rust);border-color:var(--rust);color:#160B0A}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---------- fields ---------- */
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;color:var(--fg2);font-family:var(--mono);
+  letter-spacing:.08em;text-transform:uppercase}
+.inp{background:var(--scr);border:1px solid var(--line);border-radius:9px;
+  padding:11px 12px;color:var(--fg);font:15px var(--ui);width:100%;
+  appearance:none;-webkit-appearance:none}
+select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--fg2) 50%),
+  linear-gradient(135deg,var(--fg2) 50%,transparent 50%);
+  background-position:calc(100% - 17px) 50%,calc(100% - 12px) 50%;
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:34px}
+.inp:disabled{opacity:.42}
+.ro{background:var(--scr);border:1px solid var(--line);border-radius:9px;
+  padding:11px 12px;color:var(--fg2);font-size:14px;font-weight:500;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ---------- config slot ---------- */
+.slot{background:var(--c1);border:1px solid var(--line);border-radius:12px;
+  padding:13px;display:flex;flex-direction:column;gap:11px}
+.slot.lock{border-color:#334954;background:#1D272D}
+.slot.off{opacity:.72}
+.slothead{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.slothead b{font-size:14px;font-weight:600}
+.slothead .wid{font-family:var(--mono);font-size:10px;color:var(--fg2)}
+.lockbadge{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;
+  font-family:var(--mono);letter-spacing:.06em;text-transform:uppercase;
+  color:var(--fg2);border:1px solid var(--line);border-radius:100px;padding:2px 8px}
+.frow{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;align-items:center}
+.frow > span{font-size:12px;color:var(--fg2)}
+
+/* ---------- messages ---------- */
+.warn{font-size:11.5px;color:var(--fg2);line-height:1.45;
+  border-left:2px solid var(--copper);padding-left:9px;margin:0}
+.warn.bad{border-left-color:var(--rust);color:#F0A9A0}
+#err{background:#2A1416;border:1px solid #5B2226;color:#FCA5A5;border-radius:10px;
+  padding:10px 12px;font-size:13px}
+#toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,90px);
+  background:var(--c2);border:1px solid var(--line);border-radius:9px;
+  padding:10px 18px;font-size:14px;z-index:9;transition:transform .2s;
+  max-width:86%;text-align:center}
+#toast.show{transform:translate(-50%,0)}
+@media (prefers-reduced-motion:reduce){#toast{transition:none}}
+
+/* ---------- lock ---------- */
+#vLock{gap:16px;padding-top:40px}
+#vLock .mark{width:52px;height:52px;border-radius:14px;background:var(--c1);
+  border:1px solid var(--line);display:grid;place-items:center;font-size:23px}
+#vLock h2{margin:0;font-size:21px;font-weight:700;letter-spacing:-.015em}
+#vLock p{margin:0;font-size:13px;color:var(--fg2)}
+</style>
+</head>
+<body>
+
+<header>
+  <button id="back" class="hidden" aria-label="Back">&lsaquo;</button>
+  <div id="dot"></div>
+  <h1 id="title">Sensor Unit</h1>
+  <div id="did"></div>
+</header>
+
+<main>
+  <div id="err" class="hidden"></div>
+
+  <!-- ==================== PASSKEY ==================== -->
+  <section id="vLock">
+    <div class="mark">&#128274;</div>
+    <h2>Vortex Sensor Unit</h2>
+    <p>Enter the device passkey to continue.</p>
+    <div class="field">
+      <label for="pk">Passkey</label>
+      <input class="inp" id="pk" type="password" inputmode="numeric" autocomplete="off">
+    </div>
+    <button class="btn prime" id="btnLogin">Connect</button>
+    <p class="warn">The unit only serves this page while your phone is joined to its
+      own WiFi network.</p>
+  </section>
+
+  <!-- ==================== SENSOR DATA ==================== -->
+  <section id="vData" class="hidden" style="display:flex;flex-direction:column;gap:14px">
+
+    <div class="unit">
+      <div class="urow"><span class="k">Product type</span><span class="v">Sensor unit</span></div>
+      <div class="urow"><span class="k">Device ID</span><span class="v mono" id="uId">&mdash;</span></div>
+      <div class="urow"><span class="k">Connection</span>
+        <span class="v"><span class="stat" id="uStat"><span class="d"></span><span id="uStatT">offline</span></span></span></div>
+      <div class="urow"><span class="k">Active sensors</span><span class="v mono" id="uCount">&mdash;</span></div>
+    </div>
+
+    <div class="card">
+      <p class="ttl">In-build &middot; Sensors</p>
+      <div class="duo">
+        <div class="big t1">
+          <span class="k">S01 &middot; Temperature</span>
+          <span class="n" id="bT">&mdash;</span>
+          <span class="t" id="bTn">&mdash;</span>
+        </div>
+        <div class="big t2">
+          <span class="k">S02 &middot; Humidity</span>
+          <span class="n" id="bH">&mdash;</span>
+          <span class="t" id="bHn">&mdash;</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <p class="ttl">External ports</p>
+      <div id="extList" style="display:flex;flex-direction:column;gap:9px"></div>
+    </div>
+
+    <div class="nav">
+      <button class="navbtn" data-go="cfg">
+        <span class="ico">&#127899;</span>
+        <span class="txt"><b>Sensor configuration</b><span>Assign types and tag names</span></span>
+        <span class="arw">&rsaquo;</span>
+      </button>
+      <button class="navbtn" data-go="wifi">
+        <span class="ico">&#128246;</span>
+        <span class="txt"><b>WiFi configuration</b><span>Join a router network</span></span>
+        <span class="arw">&rsaquo;</span>
+      </button>
+    </div>
+  </section>
+
+  <!-- ==================== SENSOR CONFIG ==================== -->
+  <section id="vCfg" class="hidden" style="flex-direction:column;gap:12px">
+    <p class="warn">Slots 1 and 2 are the in-build Sensors and cannot be changed. Leave a
+      port on <b>&mdash; no type &mdash;</b> and it is left out of the configuration entirely.</p>
+    <div id="slots" style="display:flex;flex-direction:column;gap:12px"></div>
+    <button class="btn prime" id="btnSaveCfg">Save configuration</button>
+    <p class="warn bad">The unit restarts as soon as the configuration is saved.
+      This page will disconnect.</p>
+  </section>
+
+  <!-- ==================== WIFI CONFIG ==================== -->
+  <section id="vWifi" class="hidden" style="flex-direction:column;gap:12px">
+    <div class="card">
+      <p class="ttl">Router credentials</p>
+      <div class="field">
+        <label for="wSsid">Router SSID</label>
+        <input class="inp" id="wSsid" type="text" autocomplete="off" autocapitalize="none">
+      </div>
+      <div class="field">
+        <label for="wPass">Password</label>
+        <input class="inp" id="wPass" type="password" autocomplete="off">
+      </div>
+      <button class="btn danger" id="btnWifi">Save &amp; restart</button>
+      <p class="warn bad">The unit reboots as soon as this is saved, leaves its own WiFi
+        and joins the router. This page will disconnect and will not come back.</p>
+    </div>
+  </section>
+</main>
+
+<div id="toast"></div>
+
+<script>
+(function () {
+  "use strict";
+
+  /* The unit replies to a BAD passkey with nothing at all, so authentication
+     can only be judged by whether device_info arrives in time. */
+  var AUTH_TIMEOUT_MS = 4000;
+  var POLL_MS         = 2000;
+  var USER            = "webui";
+  var NOTYPE          = "-- no type --";
+  var TYPES = [NOTYPE,"Temperature","Humidity","Moisture","pH","Water Level"];
+
+  var ws = null, deviceId = "", passkey = "";
+  var authed = false, view = "lock";
+  var poll = null, retry = null, authTimer = null;
+  var cfgLoaded = false;
+
+  function $(id) { return document.getElementById(id); }
+
+  /* Sensor names come from the device — never interpolate them raw. */
+  function esc(s) {
+    return String(s === undefined || s === null ? "" : s)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  function toast(m) {
+    var t = $("toast");
+    t.textContent = m;
+    t.classList.add("show");
+    clearTimeout(t._h);
+    t._h = setTimeout(function () { t.classList.remove("show"); }, 2400);
+  }
+
+  function fail(m) {
+    var e = $("err");
+    e.textContent = m || "";
+    e.classList.toggle("hidden", !m);
+  }
+
+  /* ---------------- view routing (client side only) ---------------- */
+
+  var TITLES = {
+    lock: "Sensor Unit", data: "Sensor Unit",
+    cfg:  "Sensor Configuration", wifi: "WiFi Configuration"
+  };
+
+  function show(name) {
+    view = name;
+    $("vLock").classList.toggle("hidden", name !== "lock");
+    $("vData").classList.toggle("hidden", name !== "data");
+    $("vCfg").classList.toggle("hidden",  name !== "cfg");
+    $("vWifi").classList.toggle("hidden", name !== "wifi");
+
+    $("title").textContent = TITLES[name];
+    $("back").classList.toggle("hidden", name !== "cfg" && name !== "wifi");
+
+    /* Only the live screen polls. Config is requested once, on entry. */
+    clearInterval(poll);
+    poll = null;
+    if (name === "data") { refresh(); poll = setInterval(refresh, POLL_MS); }
+    else if (name === "cfg") { buildSlots(); requestConfig(); }
+
+    window.scrollTo(0, 0);
+  }
+
+  /* ---------------- websocket ---------------- */
+
+  function send(o) {
+    if (!ws || ws.readyState !== 1) { toast("Not connected"); return false; }
+    ws.send(JSON.stringify(o));
+    return true;
+  }
+
+  function connect() {
+    var key = $("pk").value;
+    if (!key) { fail("Enter the device passkey."); return; }
+    passkey = key;
+    fail("");
+
+    clearTimeout(retry);
+    if (ws) { try { ws.close(); } catch (e) {} }
+
+    $("btnLogin").disabled = true;
+    ws = new WebSocket("ws://" + location.host + "/ws");
+
+    ws.onopen = function () {
+      /* user_id must be present — the firmware logs it without a null check. */
+      send({ event: "request_device_info", passkey: passkey, user_id: USER });
+
+      clearTimeout(authTimer);
+      authTimer = setTimeout(function () {
+        if (authed) return;
+        $("btnLogin").disabled = false;
+        fail("Passkey rejected. Check the passkey and try again.");
+        try { ws.close(); } catch (e) {}
+        ws = null;
+      }, AUTH_TIMEOUT_MS);
+    };
+
+    ws.onmessage = function (ev) {
+      var m;
+      try { m = JSON.parse(ev.data); } catch (e) { return; }
+      handle(m);
+    };
+
+    ws.onclose = function () {
+      $("dot").classList.remove("on");
+      setStatus(false);
+      clearInterval(poll);
+      poll = null;
+      /* Only auto-reconnect a session that was authenticated once. A failed
+         passkey must not spin. */
+      if (authed && deviceId) { retry = setTimeout(connect, 2000); }
+    };
+
+    ws.onerror = function () {
+      $("btnLogin").disabled = false;
+      fail("Connection failed. Are you joined to the unit's WiFi?");
+    };
+  }
+
+  function handle(m) {
+    switch (m.event) {
+
+      case "device_info":
+        clearTimeout(authTimer);
+        deviceId = m.device_id || "";
+        authed = true;
+        $("btnLogin").disabled = false;
+        $("dot").classList.add("on");
+        $("did").textContent = deviceId;
+        $("uId").textContent = deviceId || "—";
+        setStatus(true);
+        fail("");
+        if (view === "lock") { show("data"); }
+        break;
+
+      case "sensor_unit_info":
+        /* The unit broadcasts to every open socket, so a reply may be the
+           answer to the mobile app's request. Take it anyway, but only ours. */
+        if (m.device_id && deviceId && m.device_id !== deviceId) return;
+        renderData(m);
+        break;
+
+      case "get_sensor_config":
+        if (m.device_id && deviceId && m.device_id !== deviceId) return;
+        applyConfig(m);
+        break;
+    }
+  }
+
+  function setStatus(ok) {
+    var el = $("uStat");
+    if (!el) return;
+    el.classList.toggle("ok", !!ok);
+    $("uStatT").textContent = ok ? "direct" : "offline";
+  }
+
+  /* ---------------- sensor data ---------------- */
+
+  function unitFor(type) {
+    var x = String(type || "").toLowerCase();
+    if (x.indexOf("temp")  === 0) return "°C";
+    if (x.indexOf("humid") === 0) return "%";
+    if (x.indexOf("moist") === 0) return "%";
+    if (x.indexOf("water") === 0) return "%";
+    return "";
+  }
+
+  /* Wire ids are 0-based (S00..S07); the screen numbers from 1, matching
+     the mobile app. Kept here so the two conventions never drift. */
+  function displayId(wireId) {
+    var m = /^[Ss](\d+)$/.exec(String(wireId || "").trim());
+    if (!m) return wireId;
+    var n = parseInt(m[1], 10) + 1;
+    return "S" + (n < 10 ? "0" + n : "" + n);
+  }
+
+  function num(v) {
+    var n = typeof v === "number" ? v : parseFloat(v);
+    return isNaN(n) ? null : n;
+  }
+
+  function refresh() {
+    if (!authed) return;
+    send({ event: "device_basic_info",
+           data: { user_id: USER, device_id: deviceId } });
+  }
+
+  function renderData(m) {
+    var list = Array.isArray(m.data) ? m.data : [];
+    $("uCount").textContent = (m.no_sensors !== undefined)
+      ? m.no_sensors : list.length;
+
+    var ext = [];
+    for (var i = 0; i < list.length; i++) {
+      var s = list[i], v = num(s.sensor_value);
+      var txt = (v === null) ? "—" : v.toFixed(2);
+
+      if (s.sensor_id === "S00") {
+        $("bT").innerHTML = esc(txt) + "<u>°C</u>";
+        $("bTn").textContent = s.sensor_name || "—";
+      } else if (s.sensor_id === "S01") {
+        $("bH").innerHTML = esc(txt) + "<u>%</u>";
+        $("bHn").textContent = s.sensor_name || "—";
+      } else {
+        ext.push(s);
+      }
+    }
+
+    var host = $("extList");
+    if (!ext.length) {
+      host.innerHTML = '<div class="empty">No external sensors configured.<br>'
+        + 'Assign a type in Sensor configuration.</div>';
+      return;
+    }
+
+    var html = "";
+    for (var k = 0; k < ext.length; k++) {
+      var e = ext[k];
+      var ev = num(e.sensor_value);
+      var u  = unitFor(e.sensor_type);
+      html += '<div class="sen">'
+        + '<div class="srow"><span class="k">Sensor type</span><span class="v">'
+        + esc(e.sensor_type || "—")
+        + '<span class="sid">' + esc(displayId(e.sensor_id)) + '</span></span></div>'
+        + '<div class="srow"><span class="k">Tag name</span><span class="v">'
+        + esc(e.sensor_name || "—") + '</span></div>'
+        + '<div class="srow"><span class="k">Reading</span><span class="v num">'
+        + (ev === null ? "—" : esc(ev.toFixed(2) + (u ? " " + u : "")))
+        + '</span></div></div>';
+    }
+    host.innerHTML = html;
+  }
+
+  /* ---------------- sensor configuration ---------------- */
+
+  /* The unit reports only CONFIGURED ports, so all 8 slots are drawn first
+     and the reply is overlaid onto them by sensor_id. */
+  function buildSlots() {
+    var host = $("slots");
+    if (host.childElementCount) return;   /* keep what the user is editing */
+
+    var html = "";
+    for (var i = 0; i < 8; i++) {
+      var wid    = "S" + (i < 10 ? "0" + i : "" + i);
+      var locked = i < 2;
+      var num2   = (i + 1) < 10 ? "0" + (i + 1) : "" + (i + 1);
+
+      html += '<div class="slot' + (locked ? " lock" : " off") + '" data-wire="' + wid + '">'
+        + '<div class="slothead"><b>Sensor ' + num2 + '</b>'
+        + (locked ? '<span class="lockbadge">&#128274; In-build</span>'
+                  : '<span class="wid">' + wid + '</span>')
+        + '</div>';
+
+      if (locked) {
+        html += '<div class="frow"><span>Sensor type</span>'
+          + '<div class="ro js-type">' + (i === 0 ? "Temperature" : "Humidity") + '</div></div>'
+          + '<div class="frow"><span>Tag name</span>'
+          + '<div class="ro js-name">&mdash;</div></div>';
+      } else {
+        html += '<div class="frow"><span>Sensor type</span><select class="inp js-type">';
+        for (var t = 0; t < TYPES.length; t++) {
+          html += '<option>' + esc(TYPES[t]) + '</option>';
+        }
+        html += '</select></div>'
+          + '<div class="frow"><span>Tag name</span>'
+          + '<input class="inp js-name" type="text" maxlength="19" disabled '
+          + 'placeholder="Select a type first"></div>';
+      }
+      html += '</div>';
+    }
+    host.innerHTML = html;
+
+    var sels = host.querySelectorAll("select.js-type");
+    for (var s = 0; s < sels.length; s++) {
+      sels[s].addEventListener("change", function () {
+        var slot = this.parentNode.parentNode;
+        var name = slot.querySelector(".js-name");
+        var off  = this.value === NOTYPE;
+        slot.classList.toggle("off", off);
+        name.disabled = off;
+        name.placeholder = off ? "Select a type first" : "Enter tag name";
+        if (off) { name.value = ""; }
+      });
+    }
+  }
+
+  function requestConfig() {
+    if (!authed) return;
+    send({ event: "get_sensor_config", device_id: deviceId });
+  }
+
+  /* Only the FIRST reply populates the form — a later one must not overwrite
+     what the user is part-way through editing. */
+  function applyConfig(m) {
+    if (cfgLoaded) return;
+    var list = Array.isArray(m.sensor_data) ? m.sensor_data : [];
+    if (!list.length) return;
+
+    for (var i = 0; i < list.length; i++) {
+      var c    = list[i];
+      var slot = document.querySelector('#slots .slot[data-wire="'
+                   + String(c.sensor_id || "").replace(/"/g, "") + '"]');
+      if (!slot) continue;
+
+      var type = c.sensor_type || "";
+      var name = c.sensor_name || "";
+      var tEl  = slot.querySelector(".js-type");
+      var nEl  = slot.querySelector(".js-name");
+
+      if (slot.classList.contains("lock")) {
+        if (type) { tEl.textContent = type; }
+        nEl.textContent = name || "—";
+        continue;
+      }
+
+      /* Keep the dropdown valid even for a type this page doesn't list. */
+      if (type && TYPES.indexOf(type) === -1) {
+        TYPES.push(type);
+        tEl.appendChild(new Option(type, type));
+      }
+      tEl.value = type || NOTYPE;
+      var off = tEl.value === NOTYPE;
+      slot.classList.toggle("off", off);
+      nEl.disabled = off;
+      nEl.placeholder = off ? "Select a type first" : "Enter tag name";
+      nEl.value = off ? "" : name;
+    }
+    cfgLoaded = true;
+  }
+
+  /* Only configured slots go on the wire, and no_sensors counts just those.
+     The in-build pair is always included. */
+  function configPayload() {
+    var out = [];
+    var slots = document.querySelectorAll("#slots .slot");
+    for (var i = 0; i < slots.length; i++) {
+      var slot = slots[i];
+      var wid  = slot.getAttribute("data-wire");
+      var tEl  = slot.querySelector(".js-type");
+      var nEl  = slot.querySelector(".js-name");
+
+      if (slot.classList.contains("lock")) {
+        out.push({
+          sensor_id: wid,
+          sensor_type: (tEl.textContent || "").trim(),
+          sensor_name: (nEl.textContent || "").trim().replace(/^—$/, "")
+        });
+        continue;
+      }
+      if (tEl.value === NOTYPE) { continue; }
+      out.push({ sensor_id: wid, sensor_type: tEl.value,
+                 sensor_name: (nEl.value || "").trim() });
+    }
+    return out;
+  }
+
+  /* ---------------- wiring ---------------- */
+
+  $("btnLogin").onclick = connect;
+  $("pk").addEventListener("keydown", function (e) {
+    if (e.key === "Enter") { connect(); }
+  });
+
+  $("back").onclick = function () { show("data"); };
+
+  var goes = document.querySelectorAll("[data-go]");
+  for (var g = 0; g < goes.length; g++) {
+    goes[g].onclick = (function (b) {
+      return function () { show(b.getAttribute("data-go")); };
+    })(goes[g]);
+  }
+
+  $("btnSaveCfg").onclick = function () {
+    var sensors = configPayload();
+
+    for (var i = 0; i < sensors.length; i++) {
+      if (sensors[i].sensor_id !== "S00" && sensors[i].sensor_id !== "S01"
+          && !sensors[i].sensor_name) {
+        toast("Give every configured sensor a tag name");
+        return;
+      }
+    }
+
+    if (!confirm("Save the configuration and restart the unit?")) { return; }
+
+    if (send({ event: "set_sensor_config", device_id: deviceId,
+               no_sensors: sensors.length, sensor_data: sensors })) {
+      toast("Saved — unit restarting");
+      deviceId = "";              /* stop the auto-reconnect loop */
+      authed = false;
+      clearInterval(poll);
+      poll = null;
+    }
+  };
+
+  $("btnWifi").onclick = function () {
+    var s = $("wSsid").value.trim();
+    var p = $("wPass").value;
+
+    if (!s) { toast("Router SSID is required"); return; }
+    if (!confirm("Save WiFi and restart the unit?")) { return; }
+
+    /* BOTH keys must always be present as strings — the firmware reads
+       ssid and password before checking their type. */
+    if (send({ event: "set_device_wifi",
+               wifi_data: { ssid: s, password: String(p || "") } })) {
+      toast("Saved — unit restarting");
+      deviceId = "";
+      authed = false;
+      clearInterval(poll);
+      poll = null;
+    }
+  };
+
+  show("lock");
+})();
+</script>
+</body>
+</html>

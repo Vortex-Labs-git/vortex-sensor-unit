@@ -14,6 +14,8 @@
  *  - Dynamic mode switching at runtime
  *  - Logging for debug and monitoring
  */
+#include <stdint.h>
+#include <stdbool.h>
 
 #include "driver/gpio.h"
 #include "freertos/FreeRTOS.h"

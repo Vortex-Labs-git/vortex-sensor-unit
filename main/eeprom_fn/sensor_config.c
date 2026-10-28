@@ -21,8 +21,7 @@ static const char *TAG_SENSOR = "sensor_storage";
 
 
 
-esp_err_t sensor_config_load(void)
-{
+esp_err_t sensor_config_load(void) {
     nvs_handle_t handle;
     esp_err_t err;
     size_t size = sizeof(GetSensors);
@@ -40,6 +39,9 @@ esp_err_t sensor_config_load(void)
 
     if (err == ESP_OK) {
         ESP_LOGI(TAG_SENSOR, "Sensor config loaded");
+        for (int i = 0; i < 6; i++) {
+            ESP_LOGI(TAG_SENSOR, "Sensor[%d]: id=%s, type=%d, name=%s", i, UnitSensorConfig.sensors[i].sensor_id, UnitSensorConfig.sensors[i].type, UnitSensorConfig.sensors[i].sensor_name);
+        }
         return ESP_OK;
     }
 
@@ -57,8 +59,7 @@ esp_err_t sensor_config_load(void)
 
 
 
-esp_err_t sensor_config_save(void)
-{
+esp_err_t sensor_config_save(void) {
     nvs_handle_t handle;
     esp_err_t err;
 
@@ -82,6 +83,9 @@ esp_err_t sensor_config_save(void)
 
     if (err == ESP_OK) {
         ESP_LOGI(TAG_SENSOR, "Sensor config saved");
+        for (int i = 0; i < 6; i++) {
+            ESP_LOGI(TAG_SENSOR, "Sensor[%d]: id=%s, type=%d, name=%s", i, UnitSensorConfig.sensors[i].sensor_id, UnitSensorConfig.sensors[i].type, UnitSensorConfig.sensors[i].sensor_name);
+        }
     } else {
         ESP_LOGE(TAG_SENSOR, "Commit failed (%s)", esp_err_to_name(err));
     }
@@ -93,26 +97,25 @@ esp_err_t sensor_config_save(void)
 
 
 
-void sensor_config_restore_default(void)
-{
+void sensor_config_restore_default(void) {
     memset(&UnitSensorConfig, 0, sizeof(GetSensors));
 
-    strcpy(UnitSensorConfig.sensors[0].port_id, "S02");
+    strcpy(UnitSensorConfig.sensors[0].sensor_id, "S02");
     UnitSensorConfig.sensors[0].type = (sensor_type_t)DEFAULT_S02_TYPE;
 
-    strcpy(UnitSensorConfig.sensors[1].port_id, "S03");
+    strcpy(UnitSensorConfig.sensors[1].sensor_id, "S03");
     UnitSensorConfig.sensors[1].type = (sensor_type_t)DEFAULT_S03_TYPE;
 
-    strcpy(UnitSensorConfig.sensors[2].port_id, "S04");
+    strcpy(UnitSensorConfig.sensors[2].sensor_id, "S04");
     UnitSensorConfig.sensors[2].type = (sensor_type_t)DEFAULT_S04_TYPE;
 
-    strcpy(UnitSensorConfig.sensors[3].port_id, "S05");
+    strcpy(UnitSensorConfig.sensors[3].sensor_id, "S05");
     UnitSensorConfig.sensors[3].type = (sensor_type_t)DEFAULT_S05_TYPE;
 
-    strcpy(UnitSensorConfig.sensors[4].port_id, "S06");
+    strcpy(UnitSensorConfig.sensors[4].sensor_id, "S06");
     UnitSensorConfig.sensors[4].type = (sensor_type_t)DEFAULT_S06_TYPE;
 
-    strcpy(UnitSensorConfig.sensors[5].port_id, "S07");
+    strcpy(UnitSensorConfig.sensors[5].sensor_id, "S07");
     UnitSensorConfig.sensors[5].type = (sensor_type_t)DEFAULT_S07_TYPE;
 
     sensor_config_save();
