@@ -12,6 +12,9 @@
 #define SOIL_DRY_VALUE    2650
 #define SOIL_WET_VALUE    1500
 
+#define WATER_DRY_VALUE   4095
+#define WATER_WET_VALUE   0
+
 static const char *TAG_EXTERNAL = "EXTERNAL_SENSOR";
 
 
@@ -31,6 +34,23 @@ int soil_sensor_map(int raw, int wet, int dry) {
         moisture = 0;
 
     return moisture;
+}
+
+int water_level_map(int raw, int dry, int wet) {
+
+    if (dry == wet) {
+        return 0;
+    }
+
+    int level = (raw - dry) * 100 / (wet - dry);
+
+    if (level > 100)
+        level = 100;
+
+    if (level < 0)
+        level = 0;
+
+    return level;
 }
 
 
@@ -190,6 +210,16 @@ void external_sesnor_read(int sensor_index, ExternalSensor *hw) {
             // }
             break;
         
+        case SENSOR_WATER_LEVEL:
+            if (hw->channel == ADC1_CHANNEL_MAX) {
+                err = ESP_ERR_INVALID_STATE;
+                err_str = "invalid ADC channel";
+                break;
+            }
+            raw = adc1_get_raw(hw->channel);
+            value = (float)water_level_map(raw, WATER_DRY_VALUE, WATER_WET_VALUE);
+            break;
+        
         default:
             err = ESP_ERR_NOT_SUPPORTED;
             err_str = "unknown sensor type";
@@ -228,6 +258,9 @@ const char *sensor_type_to_string(sensor_type_t type) {
 
         case SENSOR_PH:
             return "pH";
+        
+        case SENSOR_WATER_LEVEL:
+            return "Water Level";
 
         default:
             return "Unknown";
@@ -239,6 +272,7 @@ sensor_type_t string_to_sensor_type(const char *type) {
     if (strcmp(type, "Humidity") == 0)    return SENSOR_HUMIDITY;
     if (strcmp(type, "Moisture") == 0)    return SENSOR_MOISTURE;
     if (strcmp(type, "pH") == 0)          return SENSOR_PH;
+    if (strcmp(type, "Water Level") == 0) return SENSOR_WATER_LEVEL;
 
     return SENSOR_NONE;
 }

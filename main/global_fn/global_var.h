@@ -33,6 +33,7 @@ typedef enum {
     SENSOR_MOISTURE,
     SENSOR_HUMIDITY,
     SENSOR_PH,
+    SENSOR_WATER_LEVEL,
 } sensor_type_t;
 
 typedef struct {
