@@ -11,29 +11,24 @@
 #include "esp_netif.h"
 #include "nvs_flash.h"
 
-
-
+#include "time_fn/time_func.h"
+#include "eeprom_fn/id_storage.h"
 #include "eeprom_fn/wifi_storage.h"
 #include "eeprom_fn/sensor_config.h"
 #include "wifi_fn/vortex_wifi.h"
+#include "sensor_fn/external_sensor.h"
 #include "sensor_fn/sensor_process.h"
+#include "wifi_supervisor.h"
 
 
 
-
-
-/* ========================== GLOBAL VARIABLES ========================== */
+static const char *TAG_MAIN = "MAIN LOOP";
 
 /**
- * @brief Mutex to protect valve-related operations
+ * @brief Mutex to protect sensor-related operations
  */
-SemaphoreHandle_t valveMutex = NULL;
-/**
- * @brief Mutex to protect web server operations
- */
-SemaphoreHandle_t serverMutex = NULL;
-
-
+SemaphoreHandle_t InbuildsensorMutex = NULL;
+SemaphoreHandle_t ExternalsensorMutex = NULL;
 
 
 
@@ -55,33 +50,44 @@ void app_main(void)
     }
     ESP_ERROR_CHECK(ret);
 
+    id_storage_load();
 
 #if CONFIG_ESP_WIFI_STA_MODE_RESET
     wifi_storage_restore_default();
 #endif
 
 #if CONFIG_SENSOR_CONFIG_RESET
-    wifi_storage_restore_default();
+    sensor_config_restore_default();
 #endif
+
+
+    InbuildsensorMutex = xSemaphoreCreateMutex();
+    if (InbuildsensorMutex == NULL) {
+        ESP_LOGE(TAG_MAIN, "Failed to create InbuildsensorMutex");
+        return;
+    }
+
+    ExternalsensorMutex = xSemaphoreCreateMutex();
+    if (ExternalsensorMutex == NULL) {
+        ESP_LOGE(TAG_MAIN, "Failed to create ExternalsensorMutex");
+        return;
+    }
+
 
     wifi_storage_load();
     sensor_config_load();
 
-    // serverMutex = xSemaphoreCreateMutex();
-    // if (serverMutex == NULL) {
-    //     ESP_LOGE(TAG_MAIN, "Failed to create serverMutex");
-    //     return;
-    // }
-
-    // load_eeprom_calibration();
-
-    // time_module_init();
-
+    
     init_sensor_unit();
 
 
+    wifi_init_smart_mode();
 
-    // wifi_init_smart_mode();
+    xTaskCreate( obtain_time, "obtain_time", 4096, NULL, 5, NULL);
 
+    xTaskCreate( external_sensor_task, "external_sensor_task", 4096, NULL, 5, NULL);
 
+    xTaskCreate( aht10_sensor_task, "aht10_sensor_task", 4096, NULL, 5, NULL);
+
+    wifi_supervisor_start();
 }

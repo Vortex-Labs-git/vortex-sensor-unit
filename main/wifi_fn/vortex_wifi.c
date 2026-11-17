@@ -22,7 +22,10 @@
 
 #include "global_fn/global_var.h"
 #include "eeprom_fn/wifi_storage.h"
+#include "sensor_fn/led_indicators.h"
 #include "sensor_fn/sensor_process.h"
+#include "websocket_fn/websocket_server_fn.h"
+#include "mqtt_fn/mqtt_client_fn.h"
 
 
 /* ========================== CONFIGURATION MACROS ========================== */
@@ -35,7 +38,6 @@
 
 
 /* AP Configuration */
-#define ESP_WIFI_AP_SSID                    CONFIG_ESP_WIFI_AP_SSID
 #define ESP_WIFI_AP_PASSWD                  CONFIG_ESP_WIFI_AP_PASSWORD
 #define ESP_WIFI_CHANNEL                    CONFIG_ESP_WIFI_AP_CHANNEL
 #define MAX_STA_CONN                        CONFIG_ESP_MAX_STA_CONN_AP
@@ -43,7 +45,6 @@
 /* ========================== GLOBAL VARIABLES ========================== */
 
 
-static const char *TAG_MAIN = "MAIN LOOP";
 static const char *TAG_AP = "WiFi SoftAP";
 static const char *TAG_STA = "WiFi Sta";
 
@@ -102,7 +103,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
 
         /* Stop MQTT */
         if (mqtt_running) {
-            // stop_mqtt_client();
+            stop_mqtt_client();
             mqtt_running = false;
         }
 
@@ -152,15 +153,17 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         ESP_LOGI(TAG_STA, "Router connected. Switching to STA Mode (Turning AP OFF)...");
         esp_wifi_set_mode(WIFI_MODE_STA);
 
+        s_ap_client_count = 0;
+
         /* Stop Webserver if running */
         if (web_running) {
-            // stop_webserver();
+            stop_webserver();
             web_running = false;
         }
 
         /* Start MQTT */
         if (!mqtt_running) {
-            // start_mqtt_client();
+            start_mqtt_client();
             mqtt_running = true;
         }
 
@@ -180,13 +183,13 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
         
         /* Stop MQTT if running */
         if (mqtt_running) {
-            // stop_mqtt_client();
+            stop_mqtt_client();
             mqtt_running = false;
         }
 
         /* Start Webserver */
         if (!web_running) {
-            // start_webserver();
+            start_webserver();
             web_running = true;
         }
 
@@ -222,7 +225,7 @@ static void wifi_event_handler(void* arg, esp_event_base_t event_base, int32_t e
             
             /* Stop Webserver */
             if (web_running) {
-                // stop_webserver();
+                stop_webserver();
                 web_running = false;
             }
 
@@ -261,8 +264,7 @@ esp_netif_t *wifi_init_softap(void)
 
     wifi_config_t wifi_ap_config = {
         .ap = {
-            .ssid = ESP_WIFI_AP_SSID,
-            .ssid_len = strlen(ESP_WIFI_AP_SSID),
+            .ssid_len = strlen(deviceIdentity.ap_ssid),
             .channel = ESP_WIFI_CHANNEL,
             .password = ESP_WIFI_AP_PASSWD,
             .max_connection = MAX_STA_CONN,
@@ -272,6 +274,8 @@ esp_netif_t *wifi_init_softap(void)
             },
         },
     };
+    strlcpy((char *)wifi_ap_config.ap.ssid, deviceIdentity.ap_ssid, sizeof(wifi_ap_config.ap.ssid));
+
 
     if (strlen(ESP_WIFI_AP_PASSWD) == 0) {
         wifi_ap_config.ap.authmode = WIFI_AUTH_OPEN;
@@ -279,7 +283,7 @@ esp_netif_t *wifi_init_softap(void)
 
     ESP_ERROR_CHECK(esp_wifi_set_config(WIFI_IF_AP, &wifi_ap_config));
 
-    ESP_LOGI(TAG_AP, "wifi_init_softap finished. SSID:%s password:%s channel:%d", ESP_WIFI_AP_SSID, ESP_WIFI_AP_PASSWD, ESP_WIFI_CHANNEL);
+    ESP_LOGI(TAG_AP, "wifi_init_softap finished. SSID:%s password:%s channel:%d", deviceIdentity.ap_ssid, ESP_WIFI_AP_PASSWD, ESP_WIFI_CHANNEL);
 
     return esp_netif_ap;
 }
