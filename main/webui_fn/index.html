@@ -269,7 +269,8 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--fg2) 50%
   var POLL_MS         = 2000;
   var USER            = "webui";
   var NOTYPE          = "-- no type --";
-  var TYPES = [NOTYPE,"Temperature","Humidity","Moisture","pH","Water Level"];
+  var TYPES = [NOTYPE,"Temperature","Humidity","Moisture","pH",
+               "Water Level 1","Water Level 2"];
 
   var ws = null, deviceId = "", passkey = "";
   var authed = false, view = "lock";
@@ -425,8 +426,23 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--fg2) 50%
     if (x.indexOf("temp")  === 0) return "°C";
     if (x.indexOf("humid") === 0) return "%";
     if (x.indexOf("moist") === 0) return "%";
-    if (x.indexOf("water") === 0) return "%";
+    /* "water level" without a suffix is the pre-split name for variant 1. */
+    if (x === "water level 1" || x === "water level") return "%";
     return "";
+  }
+
+  /* Water level 2 is a point detector, not a gauge. The wire carries 0 or
+     100 so the MQTT schema stays numeric, but showing "100.00 %" would
+     imply a level it cannot measure. */
+  function isWaterSwitch(type) {
+    return String(type || "").toLowerCase() === "water level 2";
+  }
+
+  function readingText(type, v) {
+    if (v === null) return "—";
+    if (isWaterSwitch(type)) return v >= 50 ? "Water detected" : "Dry";
+    var u = unitFor(type);
+    return v.toFixed(2) + (u ? " " + u : "");
   }
 
   /* Wire ids are 0-based (S00..S07); the screen numbers from 1, matching
@@ -481,7 +497,6 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--fg2) 50%
     for (var k = 0; k < ext.length; k++) {
       var e = ext[k];
       var ev = num(e.sensor_value);
-      var u  = unitFor(e.sensor_type);
       html += '<div class="sen">'
         + '<div class="srow"><span class="k">Sensor type</span><span class="v">'
         + esc(e.sensor_type || "—")
@@ -489,7 +504,7 @@ select.inp{background-image:linear-gradient(45deg,transparent 50%,var(--fg2) 50%
         + '<div class="srow"><span class="k">Tag name</span><span class="v">'
         + esc(e.sensor_name || "—") + '</span></div>'
         + '<div class="srow"><span class="k">Reading</span><span class="v num">'
-        + (ev === null ? "—" : esc(ev.toFixed(2) + (u ? " " + u : "")))
+        + esc(readingText(e.sensor_type, ev))
         + '</span></div></div>';
     }
     host.innerHTML = html;

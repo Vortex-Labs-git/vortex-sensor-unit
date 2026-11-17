@@ -33,7 +33,8 @@ typedef enum {
     SENSOR_MOISTURE,
     SENSOR_HUMIDITY,
     SENSOR_PH,
-    SENSOR_WATER_LEVEL,
+    SENSOR_WATER_LEVEL_1,          /* 5 - contact probe, analog      */
+    SENSOR_WATER_LEVEL_2,          /* 6 - non-contact switch, binary */
 } sensor_type_t;
 
 typedef struct {

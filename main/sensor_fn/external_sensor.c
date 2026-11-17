@@ -12,8 +12,29 @@
 #define SOIL_DRY_VALUE    2650
 #define SOIL_WET_VALUE    1500
 
-#define WATER_DRY_VALUE   4095
-#define WATER_WET_VALUE   0
+/* ---- Water level 1: contact probe (analog, continuous) ----------------
+   Resistive probe on A0. Calibrate against your own probe; this one reads
+   high dry and low submerged, so dry > wet. */
+#define WL1_DRY_VALUE     4095
+#define WL1_WET_VALUE     0
+
+/* ---- Water level 2: non-contact capacitive switch (XKC-Y25 family) ----
+   A point detector, not a gauge: liquid at the probe, or not.
+
+   Measured at the ESP32 pin after the port divider:
+       water present  ~0 V
+       no water        2.0 - 3.3 V
+
+   Deliberately NOT a digital pin read: the ESP32 only guarantees a HIGH
+   above V_IH = 0.75 x VDD = 2.475 V, so the bottom of that dry range falls
+   inside the indeterminate band and would read either way. The ADC sees
+   the real voltage, so the decision is made here with margin on both
+   sides. */
+#define WL2_PRESENT_BELOW 1200   /* ~1.0 V - below this: water */
+#define WL2_ABSENT_ABOVE  2000   /* ~1.6 V - above this: dry   */
+#define WL2_SAMPLES       9      /* must be odd                */
+#define WL2_VALUE_PRESENT 100.0f
+#define WL2_VALUE_ABSENT  0.0f
 
 static const char *TAG_EXTERNAL = "EXTERNAL_SENSOR";
 
@@ -36,6 +57,8 @@ int soil_sensor_map(int raw, int wet, int dry) {
     return moisture;
 }
 
+/* Water level 1 - continuous mapping for the contact probe. Works in both
+   directions: dry > wet (this probe) and dry < wet. */
 int water_level_map(int raw, int dry, int wet) {
 
     if (dry == wet) {
@@ -51,6 +74,41 @@ int water_level_map(int raw, int dry, int wet) {
         level = 0;
 
     return level;
+}
+
+
+/* Water level 2 - single ADC samples on this board swing by hundreds of
+   counts, so take a median rather than one reading. Outliers are discarded
+   outright instead of being averaged into the result. */
+static int wl2_adc_median(adc1_channel_t ch) {
+    int s[WL2_SAMPLES];
+
+    for (int i = 0; i < WL2_SAMPLES; i++) {
+        s[i] = adc1_get_raw(ch);
+    }
+
+    for (int i = 1; i < WL2_SAMPLES; i++) {       /* insertion sort, n small */
+        int k = s[i], j = i - 1;
+        while (j >= 0 && s[j] > k) { s[j + 1] = s[j]; j--; }
+        s[j + 1] = k;
+    }
+
+    return s[WL2_SAMPLES / 2];
+}
+
+/* Hysteresis: a tank sitting at the probe's trigger height would otherwise
+   flap every poll. Between the two thresholds the previous state stands.
+   Defaults to dry; the first reading resolves it unless it lands in the
+   dead band. */
+static bool wl2_state[6];
+
+static bool wl2_present(int idx, int raw) {
+    if (raw < WL2_PRESENT_BELOW) {
+        wl2_state[idx] = true;
+    } else if (raw > WL2_ABSENT_ABOVE) {
+        wl2_state[idx] = false;
+    }
+    return wl2_state[idx];
 }
 
 
@@ -210,14 +268,27 @@ void external_sesnor_read(int sensor_index, ExternalSensor *hw) {
             // }
             break;
         
-        case SENSOR_WATER_LEVEL:
+        case SENSOR_WATER_LEVEL_1:
             if (hw->channel == ADC1_CHANNEL_MAX) {
                 err = ESP_ERR_INVALID_STATE;
                 err_str = "invalid ADC channel";
                 break;
             }
             raw = adc1_get_raw(hw->channel);
-            value = (float)water_level_map(raw, WATER_DRY_VALUE, WATER_WET_VALUE);
+            value = (float)water_level_map(raw, WL1_DRY_VALUE, WL1_WET_VALUE);
+            break;
+
+        case SENSOR_WATER_LEVEL_2:
+            if (hw->channel == ADC1_CHANNEL_MAX) {
+                err = ESP_ERR_INVALID_STATE;
+                err_str = "invalid ADC channel";
+                break;
+            }
+            /* raw keeps the measured level for diagnostics; value stays
+               numeric (0 / 100) so the MQTT schema, the server and the app
+               models need no change. */
+            raw   = wl2_adc_median(hw->channel);
+            value = wl2_present(sensor_index, raw) ? WL2_VALUE_PRESENT: WL2_VALUE_ABSENT;
             break;
         
         default:
@@ -259,8 +330,11 @@ const char *sensor_type_to_string(sensor_type_t type) {
         case SENSOR_PH:
             return "pH";
         
-        case SENSOR_WATER_LEVEL:
-            return "Water Level";
+        case SENSOR_WATER_LEVEL_1:
+            return "Water Level 1";
+
+        case SENSOR_WATER_LEVEL_2:
+            return "Water Level 2";
 
         default:
             return "Unknown";
@@ -272,7 +346,11 @@ sensor_type_t string_to_sensor_type(const char *type) {
     if (strcmp(type, "Humidity") == 0)    return SENSOR_HUMIDITY;
     if (strcmp(type, "Moisture") == 0)    return SENSOR_MOISTURE;
     if (strcmp(type, "pH") == 0)          return SENSOR_PH;
-    if (strcmp(type, "Water Level") == 0) return SENSOR_WATER_LEVEL;
+    if (strcmp(type, "Water Level 1") == 0) return SENSOR_WATER_LEVEL_1;
+    if (strcmp(type, "Water Level 2") == 0) return SENSOR_WATER_LEVEL_2;
+    /* Accepted for compatibility: units and app builds configured before
+       the split sent the unsuffixed name for what is now variant 1. */
+    if (strcmp(type, "Water Level") == 0)   return SENSOR_WATER_LEVEL_1;
 
     return SENSOR_NONE;
 }
